@@ -16,16 +16,16 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/test", testHandler)
-	r.HandleFunc("/results/{id}", resultHandler)
-	r.HandleFunc("/accept/{id}", acceptHandler)
-	r.HandleFunc("/image/{id}", imageHandler)
+	r.HandleFunc("/tests", runTestHandler).Methods("POST")
+	r.HandleFunc("/tests/{id}", resultHandler).Methods("GET")
+	r.HandleFunc("/tests/{id}/accept", acceptHandler).Methods("POST")
+	r.HandleFunc("/image/{id}", imageHandler).Methods("GET")
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func testHandler(rw http.ResponseWriter, req *http.Request) {
+func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	var t Test
 	err := decoder.Decode(&t)
