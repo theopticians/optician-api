@@ -1,0 +1,176 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Optician API
+  description: API for optician
+#host: api.optician.io
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /tests:
+    get:
+      description: Returns all user tests
+      operationId: getTests
+      responses:
+        '200':
+          description: list of test IDs
+          schema:
+            type: array
+            items:
+              type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+    post:
+      description: Add a test and run it
+      operationId: runTest
+      parameters:
+        - name: test
+          in: body
+          description: Test to run
+          required: true
+          schema:
+            $ref: '#/definitions/Test'
+      responses:
+        '200':
+          description: test result response
+          schema:
+            $ref: '#/definitions/TestResult'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /tests/{id}:
+    get:
+      description: Returns a user based on a single ID, if the user does not have access to the pet
+      operationId: getTest
+      parameters:
+        - name: id
+          in: path
+          description: ID of test to fetch
+          required: true
+          type: string
+      responses:
+        '200':
+          description: test result response
+          schema:
+            $ref: '#/definitions/TestResult'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /tests/{id}/accept:
+    post:
+      description: Accepts a test and sets it as base image
+      operationId: acceptTest
+      parameters:
+        - name: id
+          in: path
+          description: ID of test to fetch
+          required: true
+          type: string
+      responses:
+        '200':
+          description: test result response
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /images/{id}:
+    get:
+      description: Returns image
+      operationId: getImage
+      parameters:
+        - name: id
+          in: path
+          description: ID of the image
+          required: true
+          type: string
+      responses:
+        '200':
+          description: image file response
+          schema:
+            type: file
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+definitions:
+  Test:
+    type: object
+    required:
+      - projectid
+      - branch
+      - target
+      - browser
+      - batch
+      - image
+    properties:
+      projectid:
+        type: string
+      branch:
+        type: string
+      target:
+        type: string
+      browser:
+        type: string
+      batch:
+        type: string
+      image:
+        type: string
+        format: base64
+  TestResult:
+    type: object
+    required:
+      - testid
+      - projectid
+      - branch
+      - target
+      - browser
+      - batch
+      - diffscore
+      - image
+      - baseimage
+      - diffimage
+    properties:
+      testid:
+        type: string
+      projectid:
+        type: string
+      branch:
+        type: string
+      target:
+        type: string
+      browser:
+        type: string
+      batch:
+        type: string
+      diffscore:
+        type: number
+        format: float64
+      image:
+        type: string
+        format: base64
+      baseimage:
+        type: string
+        format: base64
+      diffimage:
+        type: string
+        format: base64
+  errorModel:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+
