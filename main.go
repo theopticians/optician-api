@@ -16,6 +16,7 @@ import (
 func main() {
 	r := mux.NewRouter()
 
+	r.HandleFunc("/tests", getTestsHandler).Methods("GET")
 	r.HandleFunc("/tests", runTestHandler).Methods("POST")
 	r.HandleFunc("/tests/{id}", resultHandler).Methods("GET")
 	r.HandleFunc("/tests/{id}/accept", acceptHandler).Methods("POST")
@@ -23,6 +24,18 @@ func main() {
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func getTestsHandler(rw http.ResponseWriter, req *http.Request) {
+	testList := core.TestList()
+
+	trJSON, err := json.Marshal(testList)
+
+	if err != nil {
+		panic(err)
+	}
+
+	rw.Write(trJSON)
 }
 
 func runTestHandler(rw http.ResponseWriter, req *http.Request) {

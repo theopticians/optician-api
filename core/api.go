@@ -5,6 +5,10 @@ import "github.com/pkg/errors"
 
 var store Store = NewBoltStore("optician.db")
 
+func TestList() []string {
+	return store.GetTestList()
+}
+
 func TestImage(image image.Image, projectID, branch, target, browser string) (Results, error) {
 	randID := RandStringBytes(14)
 

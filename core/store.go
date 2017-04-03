@@ -4,6 +4,7 @@ import "image"
 
 type Store interface {
 	Close()
+	GetTestList() []string
 	GetResults(string) (Results, error)
 	StoreResults(Results) error
 	GetImage(string) (image.Image, error)

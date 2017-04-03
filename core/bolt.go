@@ -74,6 +74,24 @@ func (s *BoltStore) getValue(bucket, key string) ([]byte, error) {
 	return results, nil
 }
 
+func (s *BoltStore) GetTestList() []string {
+	ret := []string{}
+	s.db.View(func(tx *bolt.Tx) error {
+		// Assume bucket exists and has keys
+		b := tx.Bucket([]byte("results"))
+
+		c := b.Cursor()
+
+		for k, _ := c.First(); k != nil; k, _ = c.Next() {
+			ret = append(ret, string(k))
+		}
+
+		return nil
+	})
+
+	return ret
+}
+
 func (s *BoltStore) StoreResults(r Results) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("results"))
