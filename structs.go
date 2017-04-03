@@ -10,7 +10,7 @@ type Test struct {
 	Branch    string `json:"branch"`
 	Target    string `json:"target"`
 	Browser   string `json:"browser"`
-	Batch     string `json:"browser"`
+	Batch     string `json:"batch"`
 	Image     image.Image
 }
 
