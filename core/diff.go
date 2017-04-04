@@ -6,13 +6,13 @@ import (
 	"image/color"
 )
 
-func computeDiffImage(img1, img2 image.Image) (image.Image, float64) {
-	diffImg, n, _ := compareImagesBin(img1, img2)
+func computeDiffImage(img1, img2 image.Image, masks []image.Rectangle) (image.Image, float64) {
+	diffImg, n, _ := compareImagesBin(img1, img2, masks)
 	return diffImg, float64(n)
 }
 
 // CompareImagesBin compares a and b using binary comparison.
-func compareImagesBin(a, b image.Image) (image.Image, int, error) {
+func compareImagesBin(a, b image.Image, masks []image.Rectangle) (image.Image, int, error) {
 	ab, bb := a.Bounds(), b.Bounds()
 	w, h := ab.Dx(), ab.Dy()
 	if w != bb.Dx() || h != bb.Dy() {
@@ -24,7 +24,7 @@ func compareImagesBin(a, b image.Image) (image.Image, int, error) {
 		for x := 0; x < w; x++ {
 			d := diffColor(a.At(ab.Min.X+x, ab.Min.Y+y), b.At(bb.Min.X+x, bb.Min.Y+y))
 			c := color.RGBA{0, 0, 0, 0xff}
-			if d > 0 {
+			if d > 0 && !pixelInMask(x, y, masks) {
 				c.R = 0xff
 				//c.A = uint8(100 + d*0xff/0xffff)
 				n++
@@ -51,4 +51,17 @@ func abs(x int64) int64 {
 		return -x
 	}
 	return x
+}
+
+// pixelInMask checks if a pixel is inside a series of masks
+func pixelInMask(x, y int, masks []image.Rectangle) bool {
+	for _, m := range masks {
+		if x >= m.Min.X && x <= m.Max.X {
+			if y >= m.Min.Y && y <= m.Max.Y {
+				return true
+			}
+		}
+	}
+
+	return false
 }

@@ -34,7 +34,14 @@ func TestImage(image image.Image, projectID, branch, target, browser string) (Re
 		return Results{}, errors.Wrap(err, "error getting base image")
 	}
 
-	diffImg, diffScore := computeDiffImage(baseImg, image)
+	masks, err := store.GetMasks(projectID, branch, target, browser)
+	if err != nil {
+		if err == errNotFound {
+			return Results{}, err
+		}
+	}
+
+	diffImg, diffScore := computeDiffImage(baseImg, image, masks)
 
 	diffImgID, err := store.StoreImage(diffImg)
 

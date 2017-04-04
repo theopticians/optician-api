@@ -16,7 +16,7 @@ type BoltStore struct {
 	db *bolt.DB
 }
 
-func NewBoltStore(path string) *BoltStore {
+func NewBoltStore(path string) Store {
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		panic(err)
@@ -27,6 +27,7 @@ func NewBoltStore(path string) *BoltStore {
 		_, err = tx.CreateBucketIfNotExists([]byte("results"))
 		_, err = tx.CreateBucketIfNotExists([]byte("images"))
 		_, err = tx.CreateBucketIfNotExists([]byte("baseimages"))
+		_, err = tx.CreateBucketIfNotExists([]byte("masks"))
 		return err
 	})
 
@@ -72,6 +73,18 @@ func (s *BoltStore) getValue(bucket, key string) ([]byte, error) {
 	}
 
 	return results, nil
+}
+
+func (s *BoltStore) storeValue(bucket, key string, value []byte) error {
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		if err != nil {
+			return err
+		}
+
+		return b.Put([]byte(key), value)
+	})
+	return err
 }
 
 func (s *BoltStore) GetTestList() []string {
@@ -121,6 +134,37 @@ func (s *BoltStore) GetResults(ID string) (Results, error) {
 	err = json.Unmarshal(val, &res)
 
 	return res, err
+}
+
+func (s *BoltStore) GetMasks(projectID, branch, target, browser string) ([]image.Rectangle, error) {
+	key := s.generateUniqueKey(projectID, branch, target, browser)
+	serialized, err := s.getValue("masks", key)
+	if err != nil {
+		if err == errNotFound {
+			return []image.Rectangle{}, nil
+		}
+		return nil, err
+	}
+
+	var ret []image.Rectangle
+
+	err = json.Unmarshal(serialized, &ret)
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+func (s *BoltStore) StoreMasks(masks []image.Rectangle, projectID, branch, target, browser string) error {
+	key := s.generateUniqueKey(projectID, branch, target, browser)
+
+	serialized, err := json.Marshal(masks)
+	if err != nil {
+		return err
+	}
+
+	return s.storeValue("masks", key, serialized)
 }
 
 func (s *BoltStore) GetImage(imgID string) (image.Image, error) {
