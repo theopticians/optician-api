@@ -18,6 +18,11 @@ func compareImagesBin(a, b image.Image, masks []image.Rectangle) (image.Image, i
 	if w != bb.Dx() || h != bb.Dy() {
 		return nil, -1, errors.New("Different image sizes")
 	}
+
+	if err := checkMasks(masks); err != nil {
+		return nil, -1, err
+	}
+
 	diff := image.NewNRGBA(image.Rect(0, 0, w, h))
 	n := 0
 	for y := 0; y < h; y++ {
@@ -64,4 +69,14 @@ func pixelInMask(x, y int, masks []image.Rectangle) bool {
 	}
 
 	return false
+}
+
+func checkMasks(masks []image.Rectangle) error {
+	for _, m := range masks {
+		if m.Max.X < m.Min.X || m.Max.Y < m.Min.Y {
+			return errors.New("Mask is invalid")
+		}
+	}
+
+	return nil
 }
