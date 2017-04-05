@@ -6,9 +6,11 @@ import (
 	"testing"
 )
 
-const (
-	img1Path = "./testimages/so_1.png"
-	img2Path = "./testimages/so_2.png"
+var (
+	testImg1        = readImage("./testimages/so_1.png")
+	testImg2        = readImage("./testimages/so_2.png")
+	testMask1       = image.Rectangle{image.Point{0, 0}, image.Point{300, 300}}
+	testMaskInvalid = image.Rectangle{image.Point{10, 10}, image.Point{2, 30}}
 )
 
 func readImage(path string) image.Image {
@@ -22,14 +24,11 @@ func readImage(path string) image.Image {
 }
 
 func testStore(t *testing.T, newStore func() Store) {
-	img1 := readImage(img1Path)
-	//img2 := readImage(img2Path)
 
 	t.Run("image storage", func(t *testing.T) {
-
 		s := newStore()
 
-		img1ID, err := s.StoreImage(img1)
+		img1ID, err := s.StoreImage(testImg1)
 		if err != nil {
 			t.Fatal("Error storing image:", err)
 		}
@@ -39,14 +38,14 @@ func testStore(t *testing.T, newStore func() Store) {
 			t.Fatal("Error retrieving image:", err)
 		}
 
-		_, n, err := compareImagesBin(img1, img1Retrieved, []image.Rectangle{})
+		_, diffPixels, err := compareImagesBin(testImg1, img1Retrieved, []image.Rectangle{})
 		if err != nil {
 			t.Fatal("Error comparing images:", err)
 		}
 
-		if n > 0 {
+		if diffPixels > 0 {
 			t.Fatal("Retrieved image is not equal to original")
 		}
-
 	})
+
 }
