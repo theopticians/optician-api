@@ -48,4 +48,34 @@ func testStore(t *testing.T, newStore func() Store) {
 		}
 	})
 
+	t.Run("base image id", func(t *testing.T) {
+		const baseImageID = "abc"
+		const project = "project"
+		const branch = "branch"
+		const target = "target"
+		const browser = "browser"
+
+		s := newStore()
+
+		_, err := s.GetBaseImageID(project, branch, target, browser)
+		if err == nil {
+			t.Fatal("Expected error when getting unexistant base image ID")
+		}
+
+		err = s.SetBaseImageID(baseImageID, project, branch, target, browser)
+		if err != nil {
+			t.Fatal("Error setting base image:", err)
+		}
+
+		retrieved, err := s.GetBaseImageID(project, branch, target, browser)
+		if err != nil {
+			t.Fatal("Error getting base image:", err)
+		}
+
+		if retrieved != baseImageID {
+			t.Fatal("Expected retrieved base image to be ", baseImageID, " got ", retrieved)
+		}
+
+	})
+
 }
