@@ -39,7 +39,9 @@ func getTestsHandler(rw http.ResponseWriter, req *http.Request) {
 	trJSON, err := json.Marshal(testList)
 
 	if err != nil {
-		panic(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
 	}
 
 	rw.Write(trJSON)
@@ -50,7 +52,9 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 	var t Test
 	err := decoder.Decode(&t)
 	if err != nil {
-		panic(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
 	}
 
 	defer req.Body.Close()
@@ -58,13 +62,17 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 	results, err := core.TestImage(t.Image, t.ProjectID, t.Branch, t.Target, t.Browser)
 
 	if err != nil {
-		panic(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
 	}
 
 	trJSON, err := json.Marshal(results)
 
 	if err != nil {
-		panic(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
 	}
 
 	rw.Write(trJSON)
@@ -84,6 +92,8 @@ func resultHandler(rw http.ResponseWriter, req *http.Request) {
 				return
 			}
 			rw.WriteHeader(http.StatusInternalServerError)
+			rw.Write([]byte(err.Error()))
+			return
 		}
 	} else {
 		rw.WriteHeader(http.StatusBadRequest)
@@ -106,7 +116,12 @@ func acceptHandler(w http.ResponseWriter, r *http.Request) {
 	err := core.AcceptTest(id)
 
 	if err != nil {
+		if err == core.NotFoundError {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
