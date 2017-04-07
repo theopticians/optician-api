@@ -2,6 +2,7 @@ package core
 
 import (
 	"image"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -62,6 +63,7 @@ func TestImage(image image.Image, projectID, branch, target, browser string) (Re
 		BaseImageID: baseImgID,
 		DiffScore:   diffScore,
 		DiffImageID: diffImgID,
+		Timestamp:   time.Now(),
 	}
 
 	err = store.StoreResults(results)
