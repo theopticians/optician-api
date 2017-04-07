@@ -66,13 +66,21 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 func resultHandler(rw http.ResponseWriter, req *http.Request) {
 	var results core.Results
 	var err error
+	vars := mux.Vars(req)
+	id := vars["id"]
 
-	idParam := req.URL.Query().Get("id")
-	if idParam != "" {
-		results, err = core.GetResults(idParam)
+	if id != "" {
+		results, err = core.GetResults(id)
 		if err != nil {
-			panic(err)
+			if err == core.NotFoundError {
+				rw.WriteHeader(http.StatusNotFound)
+				return
+			}
+			rw.WriteHeader(http.StatusInternalServerError)
 		}
+	} else {
+		rw.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	trJSON, err := json.Marshal(results)
@@ -106,7 +114,8 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 	buffer := new(bytes.Buffer)
 	if err := png.Encode(buffer, img); err != nil {
-		log.Println("unable to encode image.")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("unable to encode image."))
 	}
 
 	w.Header().Set("Content-Type", "image/png")
@@ -114,5 +123,4 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write(buffer.Bytes()); err != nil {
 		log.Println("unable to write image.")
 	}
-
 }

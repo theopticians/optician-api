@@ -1,7 +1,10 @@
 package core
 
-import "image"
-import "github.com/pkg/errors"
+import (
+	"image"
+
+	"github.com/pkg/errors"
+)
 
 var store Store = NewBoltStore("optician.db")
 
@@ -20,7 +23,7 @@ func TestImage(image image.Image, projectID, branch, target, browser string) (Re
 
 	baseImgID, err := store.GetBaseImageID(projectID, branch, target, browser)
 	if err != nil {
-		if err == errNotFound {
+		if err == NotFoundError {
 			// IF no base image found, set this as base image
 			baseImgID = imgID
 			store.SetBaseImageID(baseImgID, projectID, branch, target, browser)
@@ -36,7 +39,7 @@ func TestImage(image image.Image, projectID, branch, target, browser string) (Re
 
 	masks, err := store.GetMasks(projectID, branch, target, browser)
 	if err != nil {
-		if err == errNotFound {
+		if err == NotFoundError {
 			return Results{}, err
 		}
 	}
