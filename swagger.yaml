@@ -81,7 +81,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /images/{id}:
+  /image/{id}:
     get:
       description: Returns image
       operationId: getImage
