@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gerardabello/optician/core"
 	"github.com/gorilla/mux"
+	"github.com/theopticians/optician-api/core"
 )
 
 func main() {
