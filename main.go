@@ -22,8 +22,15 @@ func main() {
 	r.HandleFunc("/tests/{id}/accept", acceptHandler).Methods("POST")
 	r.HandleFunc("/image/{id}", imageHandler).Methods("GET")
 
-	http.Handle("/", r)
+	http.Handle("/", middleware(r))
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func middleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		h.ServeHTTP(rw, req)
+	})
 }
 
 func getTestsHandler(rw http.ResponseWriter, req *http.Request) {
