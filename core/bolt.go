@@ -118,7 +118,7 @@ func (s *BoltStore) GetTestList() []string {
 	return ret
 }
 
-func (s *BoltStore) StoreResults(r Test) error {
+func (s *BoltStore) StoreTest(r Test) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists(resultsBucket)
 		if err != nil {
@@ -135,7 +135,7 @@ func (s *BoltStore) StoreResults(r Test) error {
 
 }
 
-func (s *BoltStore) GetResults(ID string) (Test, error) {
+func (s *BoltStore) GetTest(ID string) (Test, error) {
 	val, err := s.getValue(resultsBucket, ID)
 
 	res := Test{}

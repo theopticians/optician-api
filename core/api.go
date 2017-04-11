@@ -53,17 +53,17 @@ func NewTest(testImage image.Image, projectID, branch, target, browser string) (
 
 	err = RunTest(&results)
 
-	err = store.StoreResults(results)
+	err = store.StoreTest(results)
 
 	return results, err
 }
 
 func GetTest(id string) (Test, error) {
-	return store.GetResults(id)
+	return store.GetTest(id)
 }
 
 func AcceptTest(testID string) error {
-	test, err := store.GetResults(testID)
+	test, err := store.GetTest(testID)
 
 	if err != nil {
 		return err
