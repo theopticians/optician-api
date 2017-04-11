@@ -1,10 +1,46 @@
 package core
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"image"
 	"image/color"
 )
+
+func RunTest(r *Test) error {
+
+	baseImg, err := store.GetImage(r.BaseImageID)
+	if err != nil {
+		return errors.Wrap(err, "error getting base image")
+	}
+
+	testImg, err := store.GetImage(r.ImageID)
+	if err != nil {
+		return errors.Wrap(err, "error getting test image")
+	}
+
+	var mask []image.Rectangle
+	if r.MaskID == "nomask" {
+		mask = []image.Rectangle{}
+	} else {
+		mask, err = store.GetMask(r.MaskID)
+		if err != nil {
+			return errors.Wrap(err, "error getting mask")
+		}
+	}
+
+	diffImg, diffScore := computeDiffImage(baseImg, testImg, mask)
+
+	diffImageID, err := store.StoreImage(diffImg)
+
+	if err != nil {
+		return errors.Wrap(err, "error getting storing diff image")
+	}
+
+	r.DiffImageID = diffImageID
+	r.DiffScore = diffScore
+
+	return nil
+}
 
 func computeDiffImage(img1, img2 image.Image, masks []image.Rectangle) (image.Image, float64) {
 	diffImg, n, _ := compareImagesBin(img1, img2, masks)

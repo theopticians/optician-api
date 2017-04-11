@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/theopticians/optician-api/core"
 	"image"
 )
 
@@ -30,4 +31,23 @@ func (u *Test) UnmarshalJSON(data []byte) error {
 	u.Image = base64ToImage(aux.Image)
 
 	return nil
+}
+
+type Results core.Test
+
+func (r *Results) MarshalJSON() ([]byte, error) {
+	mask, err := core.GetMask(r.MaskID)
+	if err != nil {
+		return nil, err
+	}
+
+	type Alias Results
+	return json.Marshal(&struct {
+		Mask   []image.Rectangle `json:"mask"`
+		MaskID string            `json:"-"`
+		*Alias
+	}{
+		Mask:  mask,
+		Alias: (*Alias)(r),
+	})
 }

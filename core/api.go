@@ -9,18 +9,15 @@ import (
 
 var store Store = NewBoltStore("optician.db")
 
+// TESTS
 func TestList() []string {
 	return store.GetTestList()
 }
 
-func TestImage(image image.Image, projectID, branch, target, browser string) (Results, error) {
+func NewTest(testImage image.Image, projectID, branch, target, browser string) (Test, error) {
 	randID := RandStringBytes(14)
 
-	imgID, err := store.StoreImage(image)
-
-	if err != nil {
-		return Results{}, errors.Wrap(err, "error getting storing image")
-	}
+	imgID, err := store.StoreImage(testImage)
 
 	baseImgID, err := store.GetBaseImageID(projectID, branch, target, browser)
 	if err != nil {
@@ -29,61 +26,59 @@ func TestImage(image image.Image, projectID, branch, target, browser string) (Re
 			baseImgID = imgID
 			store.SetBaseImageID(baseImgID, projectID, branch, target, browser)
 		} else {
-			return Results{}, errors.Wrap(err, "error getting base image ID")
+			return Test{}, errors.Wrap(err, "error getting base image ID")
 		}
 	}
 
-	baseImg, err := store.GetImage(baseImgID)
-	if err != nil {
-		return Results{}, errors.Wrap(err, "error getting base image")
-	}
-
-	masks, err := store.GetMasks(projectID, branch, target, browser)
+	maskID, err := store.GetBaseMaskID(projectID, branch, target, browser)
 	if err != nil {
 		if err == NotFoundError {
-			return Results{}, err
+			maskID = "nomask"
+		} else {
+			return Test{}, errors.Wrap(err, "error getting base mask id")
 		}
 	}
 
-	diffImg, diffScore := computeDiffImage(baseImg, image, masks)
-
-	diffImgID, err := store.StoreImage(diffImg)
-
-	if err != nil {
-		return Results{}, errors.Wrap(err, "error getting storing diff image")
-	}
-
-	results := Results{
+	results := Test{
 		TestID:      randID,
 		ProjectID:   projectID,
 		Branch:      branch,
 		Target:      target,
 		Browser:     browser,
 		ImageID:     imgID,
+		MaskID:      maskID,
 		BaseImageID: baseImgID,
-		DiffScore:   diffScore,
-		DiffImageID: diffImgID,
 		Timestamp:   time.Now(),
 	}
+
+	err = RunTest(&results)
 
 	err = store.StoreResults(results)
 
 	return results, err
 }
 
-func GetResults(id string) (Results, error) {
+func GetTest(id string) (Test, error) {
 	return store.GetResults(id)
 }
 
 func AcceptTest(testID string) error {
-	r, err := store.GetResults(testID)
+	test, err := store.GetResults(testID)
 
 	if err != nil {
 		return err
 	}
 
-	return store.SetBaseImageID(r.ImageID, r.ProjectID, r.Branch, r.Target, r.Browser)
+	/*
+		if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
+			return errors.New("Cannot add masks based on an old test")
+		}
+	*/
+
+	return store.SetBaseImageID(test.ImageID, test.ProjectID, test.Branch, test.Target, test.Browser)
 }
+
+// IMAGES
 
 func GetImage(id string) image.Image {
 	img, err := store.GetImage(id)
@@ -92,4 +87,42 @@ func GetImage(id string) image.Image {
 	}
 
 	return img
+}
+
+// MASKS
+
+func GetMask(id string) ([]image.Rectangle, error) {
+	return store.GetMask(id)
+}
+
+func MaskTest(testID string, mask []image.Rectangle) (Test, error) {
+	test, err := GetTest(testID)
+	if err != nil {
+		return Test{}, err
+	}
+
+	/*
+		if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
+			return Test{}, errors.New("Cannot add masks based on an old test")
+		}
+	*/
+
+	maskID, err := store.StoreMask(mask)
+	if err != nil {
+		return Test{}, err
+	}
+
+	err = store.SetBaseMaskID(maskID, test.ProjectID, test.Branch, test.Target, test.Browser)
+	if err != nil {
+		return Test{}, err
+	}
+
+	test.MaskID = maskID
+
+	err = RunTest(&test)
+	if err != nil {
+		return Test{}, err
+	}
+
+	return test, nil
 }

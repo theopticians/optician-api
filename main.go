@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"image"
 	_ "image/jpeg"
 	"image/png"
 	"log"
@@ -18,8 +19,9 @@ func main() {
 
 	r.HandleFunc("/tests", getTestsHandler).Methods("GET")
 	r.HandleFunc("/tests", runTestHandler).Methods("POST")
-	r.HandleFunc("/tests/{id}", resultHandler).Methods("GET")
+	r.HandleFunc("/tests/{id}", getTestHandler).Methods("GET")
 	r.HandleFunc("/tests/{id}/accept", acceptHandler).Methods("POST")
+	r.HandleFunc("/tests/{id}/mask", maskHandler).Methods("POST")
 	r.HandleFunc("/image/{id}", imageHandler).Methods("GET")
 
 	http.Handle("/", middleware(r))
@@ -59,7 +61,7 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 
 	defer req.Body.Close()
 
-	results, err := core.TestImage(t.Image, t.ProjectID, t.Branch, t.Target, t.Browser)
+	results, err := core.NewTest(t.Image, t.ProjectID, t.Branch, t.Target, t.Browser)
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -78,14 +80,14 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.Write(trJSON)
 }
 
-func resultHandler(rw http.ResponseWriter, req *http.Request) {
-	var results core.Results
+func getTestHandler(rw http.ResponseWriter, req *http.Request) {
+	var results core.Test
 	var err error
 	vars := mux.Vars(req)
 	id := vars["id"]
 
 	if id != "" {
-		results, err = core.GetResults(id)
+		results, err = core.GetTest(id)
 		if err != nil {
 			if err == core.NotFoundError {
 				rw.WriteHeader(http.StatusNotFound)
@@ -114,6 +116,37 @@ func acceptHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	err := core.AcceptTest(id)
+
+	if err != nil {
+		if err == core.NotFoundError {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func maskHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	decoder := json.NewDecoder(r.Body)
+	var m []image.Rectangle
+	err := decoder.Decode(&m)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	defer r.Body.Close()
+
+	// TODO return new results
+	_, err = core.MaskTest(id, m)
 
 	if err != nil {
 		if err == core.NotFoundError {
