@@ -69,13 +69,15 @@ func AcceptTest(testID string) error {
 		return err
 	}
 
-	/*
-		if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
-			return errors.New("Cannot add masks based on an old test")
-		}
-	*/
+	if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
+		return errors.New("Cannot accept an old test")
+	}
 
 	return store.SetBaseImageID(test.ImageID, test.ProjectID, test.Branch, test.Target, test.Browser)
+}
+
+func GetLastTest(projectID, branch, target, browser string) string {
+	return store.GetLastTest(projectID, branch, target, browser).TestID
 }
 
 // IMAGES
@@ -101,11 +103,9 @@ func MaskTest(testID string, mask []image.Rectangle) (Test, error) {
 		return Test{}, err
 	}
 
-	/*
-		if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
-			return Test{}, errors.New("Cannot add masks based on an old test")
-		}
-	*/
+	if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
+		return Test{}, errors.New("Cannot add masks based on an old test")
+	}
 
 	maskID, err := store.StoreMask(mask)
 	if err != nil {

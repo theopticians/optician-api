@@ -103,13 +103,42 @@ func (s *BoltStore) storeValue(bucket []byte, key string, value []byte) error {
 func (s *BoltStore) GetTestList() []string {
 	ret := []string{}
 	s.db.View(func(tx *bolt.Tx) error {
-		// Assume bucket exists and has keys
+
 		b := tx.Bucket(resultsBucket)
 
 		c := b.Cursor()
 
 		for k, _ := c.First(); k != nil; k, _ = c.Next() {
 			ret = append(ret, string(k))
+		}
+
+		return nil
+	})
+
+	return ret
+}
+
+func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Test {
+	ret := Test{}
+	s.db.View(func(tx *bolt.Tx) error {
+
+		b := tx.Bucket(resultsBucket)
+
+		c := b.Cursor()
+
+		for k, _ := c.First(); k != nil; k, _ = c.Next() {
+			var t Test
+
+			err := json.Unmarshal(k, &t)
+			if err != nil {
+				return err
+			}
+
+			if t.ProjectID == projectID && t.Branch == branch && t.Target == target && t.Browser == browser {
+				if t.Timestamp.After(ret.Timestamp) {
+					ret = t
+				}
+			}
 		}
 
 		return nil

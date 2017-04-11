@@ -6,6 +6,7 @@ type Store interface {
 	Close()
 	GetTestList() []string
 	GetTest(string) (Test, error)
+	GetLastTest(projectID, branch, target, browser string) Test
 	GetMask(string) ([]image.Rectangle, error)
 	StoreMask(masks []image.Rectangle) (string, error)
 	StoreTest(Test) error
