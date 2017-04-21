@@ -6,17 +6,11 @@ import (
 	"image"
 )
 
-type Test struct {
-	ProjectID string `json:"projectid"`
-	Branch    string `json:"branch"`
-	Target    string `json:"target"`
-	Browser   string `json:"browser"`
-	Batch     string `json:"batch"`
-	Image     image.Image
-}
+type Result core.Result
+type Case core.Case
 
-func (u *Test) UnmarshalJSON(data []byte) error {
-	type Alias Test
+func (u *Case) UnmarshalJSON(data []byte) error {
+	type Alias Case
 	aux := struct {
 		Image string `json:"image"`
 		*Alias
@@ -33,15 +27,13 @@ func (u *Test) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type Results core.Test
-
-func (r *Results) MarshalJSON() ([]byte, error) {
+func (r *Result) MarshalJSON() ([]byte, error) {
 	mask, err := core.GetMask(r.MaskID)
 	if err != nil {
 		return nil, err
 	}
 
-	type Alias Results
+	type Alias Result
 	return json.Marshal(&struct {
 		Mask   []image.Rectangle `json:"mask"`
 		MaskID string            `json:"-"`

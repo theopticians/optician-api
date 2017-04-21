@@ -6,7 +6,7 @@ import (
 	"image/color"
 )
 
-func RunTest(r *Test) error {
+func RunTest(r *Result) error {
 
 	baseImg, err := store.GetImage(r.BaseImageID)
 	if err != nil {

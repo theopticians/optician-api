@@ -17,11 +17,11 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/tests", getTestsHandler).Methods("GET")
-	r.HandleFunc("/tests", runTestHandler).Methods("POST")
-	r.HandleFunc("/tests/{id}", getTestHandler).Methods("GET")
-	r.HandleFunc("/tests/{id}/accept", acceptHandler).Methods("POST")
-	r.HandleFunc("/tests/{id}/mask", maskHandler).Methods("POST")
+	r.HandleFunc("/cases", addCaseHandler).Methods("POST")
+	r.HandleFunc("/results", getResultsHandler).Methods("GET")
+	r.HandleFunc("/results/{id}", getResultHandler).Methods("GET")
+	r.HandleFunc("/results/{id}/accept", acceptHandler).Methods("POST")
+	r.HandleFunc("/results/{id}/mask", maskHandler).Methods("POST")
 	r.HandleFunc("/image/{id}", imageHandler).Methods("GET")
 
 	http.Handle("/", middleware(r))
@@ -35,7 +35,7 @@ func middleware(h http.Handler) http.Handler {
 	})
 }
 
-func getTestsHandler(rw http.ResponseWriter, req *http.Request) {
+func getResultsHandler(rw http.ResponseWriter, req *http.Request) {
 	testList := core.TestList()
 
 	trJSON, err := json.Marshal(testList)
@@ -49,10 +49,10 @@ func getTestsHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.Write(trJSON)
 }
 
-func runTestHandler(rw http.ResponseWriter, req *http.Request) {
+func addCaseHandler(rw http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	var t Test
-	err := decoder.Decode(&t)
+	var c Case
+	err := decoder.Decode(&c)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte(err.Error()))
@@ -61,7 +61,7 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 
 	defer req.Body.Close()
 
-	results, err := core.NewTest(t.Image, t.ProjectID, t.Branch, t.Target, t.Browser)
+	results, err := core.AddCase(core.Case(c))
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -80,8 +80,8 @@ func runTestHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.Write(trJSON)
 }
 
-func getTestHandler(rw http.ResponseWriter, req *http.Request) {
-	var results core.Test
+func getResultHandler(rw http.ResponseWriter, req *http.Request) {
+	var results core.Result
 	var err error
 	vars := mux.Vars(req)
 	id := vars["id"]

@@ -118,8 +118,8 @@ func (s *BoltStore) GetTestList() []string {
 	return ret
 }
 
-func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Test {
-	ret := Test{}
+func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Result {
+	ret := Result{}
 	s.db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket(resultsBucket)
@@ -127,7 +127,7 @@ func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Test 
 		c := b.Cursor()
 
 		for k, _ := c.First(); k != nil; k, _ = c.Next() {
-			var t Test
+			var t Result
 
 			err := json.Unmarshal(k, &t)
 			if err != nil {
@@ -147,7 +147,7 @@ func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Test 
 	return ret
 }
 
-func (s *BoltStore) StoreTest(r Test) error {
+func (s *BoltStore) StoreTest(r Result) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists(resultsBucket)
 		if err != nil {
@@ -158,16 +158,16 @@ func (s *BoltStore) StoreTest(r Test) error {
 		if err != nil {
 			return err
 		}
-		return b.Put([]byte(r.TestID), encoded)
+		return b.Put([]byte(r.ID), encoded)
 	})
 	return err
 
 }
 
-func (s *BoltStore) GetTest(ID string) (Test, error) {
+func (s *BoltStore) GetTest(ID string) (Result, error) {
 	val, err := s.getValue(resultsBucket, ID)
 
-	res := Test{}
+	res := Result{}
 
 	if err != nil {
 		return res, err

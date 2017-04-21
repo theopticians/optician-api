@@ -1,9 +1,12 @@
 package core
 
-import "time"
+import (
+	"image"
+	"time"
+)
 
-type Test struct {
-	TestID      string    `json:"testid"`
+type Result struct {
+	ID          string    `json:"id"`
 	ProjectID   string    `json:"projectid"`
 	Branch      string    `json:"branch"`
 	Batch       string    `json:"batch"`
@@ -15,4 +18,13 @@ type Test struct {
 	BaseImageID string    `json:"baseimage"`
 	DiffImageID string    `json:"diffimage"`
 	Timestamp   time.Time `json:"timestamp"`
+}
+
+type Case struct {
+	ProjectID string `json:"projectid"`
+	Branch    string `json:"branch"`
+	Target    string `json:"target"`
+	Browser   string `json:"browser"`
+	Batch     string `json:"batch"`
+	Image     image.Image
 }

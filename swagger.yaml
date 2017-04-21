@@ -11,41 +11,41 @@ consumes:
 produces:
   - application/json
 paths:
-  /tests:
+  /cases:
+    post:
+      description: Add a case and run it
+      operationId: addCase
+      parameters:
+        - name: case
+          in: body
+          description: Test to run
+          required: true
+          schema:
+            $ref: '#/definitions/Case'
+      responses:
+        '303':
+          description: ok response, see other (results)
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /results:
     get:
       description: Returns all user tests
       operationId: getTests
       responses:
         '200':
-          description: list of test IDs
+          description: list of tests
           schema:
             type: array
             items:
-              type: string
+              schema:
+                $ref: '#/definitions/Result'
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-    post:
-      description: Add a test and run it
-      operationId: runTest
-      parameters:
-        - name: test
-          in: body
-          description: Test to run
-          required: true
-          schema:
-            $ref: '#/definitions/Test'
-      responses:
-        '200':
-          description: test result response
-          schema:
-            $ref: '#/definitions/TestResult'
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/errorModel'
-  /tests/{id}:
+  /results/{id}:
     get:
       description: Returns a user based on a single ID, if the user does not have access to the pet
       operationId: getTest
@@ -59,12 +59,12 @@ paths:
         '200':
           description: test result response
           schema:
-            $ref: '#/definitions/TestResult'
+            $ref: '#/definitions/Result'
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /tests/{id}/accept:
+  /results/{id}/accept:
     post:
       description: Accepts a test and sets it as base image
       operationId: acceptTest
@@ -101,7 +101,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 definitions:
-  Test:
+  Case:
     type: object
     required:
       - projectid
@@ -124,10 +124,10 @@ definitions:
       image:
         type: string
         format: base64
-  TestResult:
+  Result:
     type: object
     required:
-      - testid
+      - id
       - projectid
       - branch
       - target

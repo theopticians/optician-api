@@ -14,8 +14,14 @@ func TestList() []string {
 	return store.GetTestList()
 }
 
-func NewTest(testImage image.Image, projectID, branch, target, browser string) (Test, error) {
+func AddCase(c Case) (Result, error) {
 	randID := RandStringBytes(14)
+
+	testImage := c.Image
+	projectID := c.ProjectID
+	branch := c.Branch
+	target := c.Target
+	browser := c.Browser
 
 	imgID, err := store.StoreImage(testImage)
 
@@ -26,7 +32,7 @@ func NewTest(testImage image.Image, projectID, branch, target, browser string) (
 			baseImgID = imgID
 			store.SetBaseImageID(baseImgID, projectID, branch, target, browser)
 		} else {
-			return Test{}, errors.Wrap(err, "error getting base image ID")
+			return Result{}, errors.Wrap(err, "error getting base image ID")
 		}
 	}
 
@@ -35,12 +41,12 @@ func NewTest(testImage image.Image, projectID, branch, target, browser string) (
 		if err == NotFoundError {
 			maskID = "nomask"
 		} else {
-			return Test{}, errors.Wrap(err, "error getting base mask id")
+			return Result{}, errors.Wrap(err, "error getting base mask id")
 		}
 	}
 
-	results := Test{
-		TestID:      randID,
+	results := Result{
+		ID:          randID,
 		ProjectID:   projectID,
 		Branch:      branch,
 		Target:      target,
@@ -58,7 +64,7 @@ func NewTest(testImage image.Image, projectID, branch, target, browser string) (
 	return results, err
 }
 
-func GetTest(id string) (Test, error) {
+func GetTest(id string) (Result, error) {
 	return store.GetTest(id)
 }
 
@@ -77,7 +83,7 @@ func AcceptTest(testID string) error {
 }
 
 func GetLastTest(projectID, branch, target, browser string) string {
-	return store.GetLastTest(projectID, branch, target, browser).TestID
+	return store.GetLastTest(projectID, branch, target, browser).ID
 }
 
 // IMAGES
@@ -97,31 +103,31 @@ func GetMask(id string) ([]image.Rectangle, error) {
 	return store.GetMask(id)
 }
 
-func MaskTest(testID string, mask []image.Rectangle) (Test, error) {
+func MaskTest(testID string, mask []image.Rectangle) (Result, error) {
 	test, err := GetTest(testID)
 	if err != nil {
-		return Test{}, err
+		return Result{}, err
 	}
 
 	if testID != GetLastTest(test.ProjectID, test.Branch, test.Target, test.Browser) {
-		return Test{}, errors.New("Cannot add masks based on an old test")
+		return Result{}, errors.New("Cannot add masks based on an old test")
 	}
 
 	maskID, err := store.StoreMask(mask)
 	if err != nil {
-		return Test{}, err
+		return Result{}, err
 	}
 
 	err = store.SetBaseMaskID(maskID, test.ProjectID, test.Branch, test.Target, test.Browser)
 	if err != nil {
-		return Test{}, err
+		return Result{}, err
 	}
 
 	test.MaskID = maskID
 
 	err = RunTest(&test)
 	if err != nil {
-		return Test{}, err
+		return Result{}, err
 	}
 
 	return test, nil
