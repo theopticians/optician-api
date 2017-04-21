@@ -100,25 +100,32 @@ func (s *BoltStore) storeValue(bucket []byte, key string, value []byte) error {
 	return err
 }
 
-func (s *BoltStore) GetTestList() []string {
-	ret := []string{}
-	s.db.View(func(tx *bolt.Tx) error {
+func (s *BoltStore) GetResults() ([]Result, error) {
+	ret := []Result{}
+	err := s.db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket(resultsBucket)
 
 		c := b.Cursor()
 
-		for k, _ := c.First(); k != nil; k, _ = c.Next() {
-			ret = append(ret, string(k))
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			r := Result{}
+
+			err := json.Unmarshal(v, &r)
+			if err != nil {
+				return err
+			}
+
+			ret = append(ret, r)
 		}
 
 		return nil
 	})
 
-	return ret
+	return ret, err
 }
 
-func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Result {
+func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) Result {
 	ret := Result{}
 	s.db.View(func(tx *bolt.Tx) error {
 
@@ -147,7 +154,7 @@ func (s *BoltStore) GetLastTest(projectID, branch, target, browser string) Resul
 	return ret
 }
 
-func (s *BoltStore) StoreTest(r Result) error {
+func (s *BoltStore) StoreResult(r Result) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists(resultsBucket)
 		if err != nil {
@@ -164,7 +171,7 @@ func (s *BoltStore) StoreTest(r Result) error {
 
 }
 
-func (s *BoltStore) GetTest(ID string) (Result, error) {
+func (s *BoltStore) GetResult(ID string) (Result, error) {
 	val, err := s.getValue(resultsBucket, ID)
 
 	res := Result{}

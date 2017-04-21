@@ -36,9 +36,15 @@ func middleware(h http.Handler) http.Handler {
 }
 
 func getResultsHandler(rw http.ResponseWriter, req *http.Request) {
-	testList := core.TestList()
+	tests, err := core.Results()
 
-	trJSON, err := json.Marshal(testList)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	trJSON, err := json.Marshal(tests)
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)

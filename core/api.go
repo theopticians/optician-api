@@ -10,8 +10,8 @@ import (
 var store Store = NewBoltStore("optician.db")
 
 // TESTS
-func TestList() []string {
-	return store.GetTestList()
+func Results() ([]Result, error) {
+	return store.GetResults()
 }
 
 func AddCase(c Case) (Result, error) {
@@ -59,17 +59,17 @@ func AddCase(c Case) (Result, error) {
 
 	err = RunTest(&results)
 
-	err = store.StoreTest(results)
+	err = store.StoreResult(results)
 
 	return results, err
 }
 
 func GetTest(id string) (Result, error) {
-	return store.GetTest(id)
+	return store.GetResult(id)
 }
 
 func AcceptTest(testID string) error {
-	test, err := store.GetTest(testID)
+	test, err := store.GetResult(testID)
 
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func AcceptTest(testID string) error {
 }
 
 func GetLastTest(projectID, branch, target, browser string) string {
-	return store.GetLastTest(projectID, branch, target, browser).ID
+	return store.GetLastResult(projectID, branch, target, browser).ID
 }
 
 // IMAGES

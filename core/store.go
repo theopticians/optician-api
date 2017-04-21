@@ -4,12 +4,12 @@ import "image"
 
 type Store interface {
 	Close()
-	GetTestList() []string
-	GetTest(string) (Result, error)
-	GetLastTest(projectID, branch, target, browser string) Result
+	GetResults() ([]Result, error)
+	GetResult(string) (Result, error)
+	GetLastResult(projectID, branch, target, browser string) Result
 	GetMask(string) ([]image.Rectangle, error)
 	StoreMask(masks []image.Rectangle) (string, error)
-	StoreTest(Result) error
+	StoreResult(Result) error
 	GetImage(string) (image.Image, error)
 	StoreImage(image.Image) (string, error)
 	GetBaseImageID(projectID, branch, target, browser string) (string, error)
