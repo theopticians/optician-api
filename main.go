@@ -75,15 +75,8 @@ func addCaseHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	trJSON, err := json.Marshal(results)
-
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		rw.Write([]byte(err.Error()))
-		return
-	}
-
-	rw.Write(trJSON)
+	rw.Header().Set("Location", "/results/"+results.ID)
+	rw.WriteHeader(http.StatusCreated)
 }
 
 func getResultHandler(rw http.ResponseWriter, req *http.Request) {
