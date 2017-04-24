@@ -6,6 +6,7 @@ import (
 	"errors"
 	"image"
 	"image/png"
+	"sort"
 
 	"github.com/boltdb/bolt"
 )
@@ -121,6 +122,8 @@ func (s *BoltStore) GetResults() ([]Result, error) {
 
 		return nil
 	})
+
+	sort.Slice(ret, func(i, j int) bool { return ret[i].Timestamp.After(ret[j].Timestamp) })
 
 	return ret, err
 }
