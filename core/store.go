@@ -6,7 +6,7 @@ type Store interface {
 	Close()
 	GetResults() ([]Result, error)
 	GetResult(string) (Result, error)
-	GetLastResult(projectID, branch, target, browser string) Result
+	GetLastResult(projectID, branch, target, browser string) (Result, error)
 	GetMask(string) ([]image.Rectangle, error)
 	StoreMask(masks []image.Rectangle) (string, error)
 	StoreResult(Result) error

@@ -40,7 +40,6 @@ func NewBoltStore(path string) Store {
 		_, err = tx.CreateBucketIfNotExists(baseMasksBucket)
 		return err
 	})
-
 	if err != nil {
 		panic(err)
 	}
@@ -128,18 +127,19 @@ func (s *BoltStore) GetResults() ([]Result, error) {
 	return ret, err
 }
 
-func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) Result {
+func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (Result, error) {
 	ret := Result{}
-	s.db.View(func(tx *bolt.Tx) error {
+	err := s.db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket(resultsBucket)
 
 		c := b.Cursor()
 
-		for k, _ := c.First(); k != nil; k, _ = c.Next() {
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+
 			var t Result
 
-			err := json.Unmarshal(k, &t)
+			err := json.Unmarshal(v, &t)
 			if err != nil {
 				return err
 			}
@@ -154,7 +154,7 @@ func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) Res
 		return nil
 	})
 
-	return ret
+	return ret, err
 }
 
 func (s *BoltStore) StoreResult(r Result) error {
