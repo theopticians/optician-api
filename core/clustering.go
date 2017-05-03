@@ -27,7 +27,7 @@ func clusterDiffImage(img image.Image) []image.Rectangle {
 		pix, err = findUnmaskedPixel(img, mask)
 	}
 
-	return clusters
+	return mergeOverlappingClusters(clusters)
 }
 
 // If needed, makes a rect bigger to fit the point
@@ -51,6 +51,29 @@ func growRect(rect *image.Rectangle, point image.Point) {
 		}
 
 	}
+}
+
+func mergeClustersByCondition(c []image.Rectangle, condition func(image.Rectangle, image.Rectangle) bool) []image.Rectangle {
+	clusters := c
+	for i := 0; i < len(clusters); i++ {
+		for j := i + 1; j < len(clusters); j++ {
+			if condition(clusters[i], clusters[j]) {
+				growRect(&clusters[j], clusters[i].Min)
+				growRect(&clusters[j], clusters[i].Max)
+				clusters = append(clusters[:i], clusters[i+1:]...)
+
+				return mergeClustersByCondition(clusters, condition)
+			}
+		}
+	}
+
+	return clusters
+}
+
+func mergeOverlappingClusters(c []image.Rectangle) []image.Rectangle {
+	return mergeClustersByCondition(c, func(r1, r2 image.Rectangle) bool {
+		return r1.Overlaps(r2)
+	})
 }
 
 // Finds the smallest rect that contains all points
