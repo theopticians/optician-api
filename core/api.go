@@ -27,7 +27,7 @@ func AddCase(c Case) (Result, error) {
 
 	baseImgID, err := store.GetBaseImageID(projectID, branch, target, browser)
 	if err != nil {
-		if err == NotFoundError {
+		if err == KeyNotFoundError {
 			// IF no base image found, set this as base image
 			baseImgID = imgID
 			store.SetBaseImageID(baseImgID, projectID, branch, target, browser)
@@ -38,7 +38,7 @@ func AddCase(c Case) (Result, error) {
 
 	maskID, err := store.GetBaseMaskID(projectID, branch, target, browser)
 	if err != nil {
-		if err == NotFoundError {
+		if err == KeyNotFoundError {
 			maskID = "nomask"
 		} else {
 			return Result{}, errors.Wrap(err, "error getting base mask id")

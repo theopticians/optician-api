@@ -88,7 +88,7 @@ func getResultHandler(rw http.ResponseWriter, req *http.Request) {
 	if id != "" {
 		results, err = core.GetTest(id)
 		if err != nil {
-			if err == core.NotFoundError {
+			if err == core.KeyNotFoundError {
 				rw.WriteHeader(http.StatusNotFound)
 				return
 			}
@@ -118,7 +118,7 @@ func acceptHandler(w http.ResponseWriter, r *http.Request) {
 	err := core.AcceptTest(id)
 
 	if err != nil {
-		if err == core.NotFoundError {
+		if err == core.KeyNotFoundError {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -149,7 +149,7 @@ func maskHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = core.MaskTest(id, []image.Rectangle(*m))
 
 	if err != nil {
-		if err == core.NotFoundError {
+		if err == core.KeyNotFoundError {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}

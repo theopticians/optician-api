@@ -37,12 +37,14 @@ func (r *ApiResult) MarshalJSON() ([]byte, error) {
 
 	type Alias ApiResult
 	return json.Marshal(&struct {
-		Mask   ApiRect `json:"mask"`
-		MaskID string  `json:"-"`
+		Mask         ApiRect `json:"mask"`
+		DiffClusters ApiRect `json:"diffclusters"`
+		MaskID       string  `json:"-"`
 		*Alias
 	}{
-		Mask:  ApiRect(mask),
-		Alias: (*Alias)(r),
+		Mask:         ApiRect(mask),
+		DiffClusters: ApiRect(r.DiffClusters),
+		Alias:        (*Alias)(r),
 	})
 }
 

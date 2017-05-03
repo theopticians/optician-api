@@ -19,7 +19,7 @@ var (
 	masksBucket      = []byte("masks")
 )
 
-var NotFoundError = errors.New("Key not found in DB")
+var KeyNotFoundError = errors.New("Key not found in DB")
 
 type BoltStore struct {
 	db *bolt.DB
@@ -78,7 +78,7 @@ func (s *BoltStore) getValue(bucket []byte, key string) ([]byte, error) {
 	}
 
 	if results == nil {
-		return nil, NotFoundError
+		return nil, KeyNotFoundError
 	}
 
 	return results, nil
@@ -192,7 +192,7 @@ func (s *BoltStore) GetMask(id string) ([]image.Rectangle, error) {
 	key := id
 	serialized, err := s.getValue(masksBucket, key)
 	if err != nil {
-		if err == NotFoundError {
+		if err == KeyNotFoundError {
 			return []image.Rectangle{}, nil
 		}
 		return nil, err

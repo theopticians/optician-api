@@ -36,6 +36,7 @@ func RunTest(r *Result) error {
 		return errors.Wrap(err, "error getting storing diff image")
 	}
 
+	r.DiffClusters = clusterDiffImage(diffImg)
 	r.DiffImageID = diffImageID
 	r.DiffScore = diffScore
 
@@ -64,9 +65,10 @@ func compareImagesBin(a, b image.Image, masks []image.Rectangle) (image.Image, i
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			d := diffColor(a.At(ab.Min.X+x, ab.Min.Y+y), b.At(bb.Min.X+x, bb.Min.Y+y))
-			c := color.RGBA{0, 0, 0, 0xff}
+			c := color.RGBA{0, 0, 0, 0}
 			if d > 0 && !pixelInMask(x, y, masks) {
 				c.R = 0xff
+				c.A = 0xff
 				//c.A = uint8(100 + d*0xff/0xffff)
 				n++
 			}
