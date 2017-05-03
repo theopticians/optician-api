@@ -57,7 +57,7 @@ func getResultsHandler(rw http.ResponseWriter, req *http.Request) {
 
 func addCaseHandler(rw http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	var c Case
+	var c ApiCase
 	err := decoder.Decode(&c)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -101,7 +101,8 @@ func getResultHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	trJSON, err := json.Marshal(results)
+	apiResult := ApiResult(results)
+	trJSON, err := json.Marshal(&apiResult)
 
 	if err != nil {
 		panic(err)
@@ -134,8 +135,8 @@ func maskHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	decoder := json.NewDecoder(r.Body)
-	var m []image.Rectangle
-	err := decoder.Decode(&m)
+	m := &ApiMask{}
+	err := decoder.Decode(m)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -145,7 +146,7 @@ func maskHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// TODO return new results
-	_, err = core.MaskTest(id, m)
+	_, err = core.MaskTest(id, []image.Rectangle(*m))
 
 	if err != nil {
 		if err == core.NotFoundError {

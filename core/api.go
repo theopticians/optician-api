@@ -138,5 +138,11 @@ func MaskTest(testID string, mask []image.Rectangle) (Result, error) {
 		return Result{}, err
 	}
 
+	err = store.StoreResult(test)
+
+	if err != nil {
+		return Result{}, err
+	}
+
 	return test, nil
 }
