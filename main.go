@@ -135,7 +135,7 @@ func maskHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	decoder := json.NewDecoder(r.Body)
-	m := &ApiMask{}
+	m := &ApiRect{}
 	err := decoder.Decode(m)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -9,7 +9,7 @@ import (
 
 type ApiResult core.Result
 type ApiCase core.Case
-type ApiMask []image.Rectangle
+type ApiRect []image.Rectangle
 
 func (u *ApiCase) UnmarshalJSON(data []byte) error {
 	type Alias ApiCase
@@ -37,16 +37,16 @@ func (r *ApiResult) MarshalJSON() ([]byte, error) {
 
 	type Alias ApiResult
 	return json.Marshal(&struct {
-		Mask   ApiMask `json:"mask"`
+		Mask   ApiRect `json:"mask"`
 		MaskID string  `json:"-"`
 		*Alias
 	}{
-		Mask:  ApiMask(mask),
+		Mask:  ApiRect(mask),
 		Alias: (*Alias)(r),
 	})
 }
 
-func (m *ApiMask) UnmarshalJSON(data []byte) error {
+func (m *ApiRect) UnmarshalJSON(data []byte) error {
 
 	aux := []struct {
 		X      int `json:"x"`
@@ -60,7 +60,7 @@ func (m *ApiMask) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	newMask := ApiMask(make([]image.Rectangle, len(aux)))
+	newMask := ApiRect(make([]image.Rectangle, len(aux)))
 
 	for i := 0; i < len(aux); i++ {
 		newMask[i].Min = image.Point{X: aux[i].X, Y: aux[i].Y}
@@ -71,7 +71,7 @@ func (m *ApiMask) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m ApiMask) MarshalJSON() ([]byte, error) {
+func (m ApiRect) MarshalJSON() ([]byte, error) {
 	aux := make([]struct {
 		X      int `json:"x"`
 		Y      int `json:"y"`
