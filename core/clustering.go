@@ -10,6 +10,7 @@ import (
 var NoPixelFoundErr = errors.New("No pixel found")
 
 func clusterDiffImage(img image.Image) []image.Rectangle {
+	println("Clustering image...")
 	mask := image.NewAlpha(img.Bounds())
 
 	var err error
@@ -26,9 +27,16 @@ func clusterDiffImage(img image.Image) []image.Rectangle {
 		cluster := pointsBounds(pixels)
 		clusters = append(clusters, cluster)
 		pix, err = findUnmaskedPixel(img, mask)
+		println("-- found cluster")
 	}
 
-	return mergeCloseClusters(mergeOverlappingClusters(clusters), 5)
+	println("-- merging overlapping")
+	clusters = mergeOverlappingClusters(clusters)
+	println("-- merging close")
+	clusters = mergeCloseClusters(clusters, 5)
+
+	println("Finished clustering")
+	return clusters
 }
 
 // If needed, makes a rect bigger to fit the point
