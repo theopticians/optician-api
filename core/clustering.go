@@ -7,9 +7,11 @@ import (
 	"math"
 )
 
+type clusterer func(image.Image) []image.Rectangle
+
 var NoPixelFoundErr = errors.New("No pixel found")
 
-func clusterDiffImage(img image.Image) []image.Rectangle {
+func naiveClusterer(img image.Image) []image.Rectangle {
 	mask := image.NewAlpha(img.Bounds())
 
 	var err error
@@ -111,7 +113,7 @@ func rectangleDistance(r1, r2 image.Rectangle) float64 {
 		return float64(r2.Min.Y - r1.Max.Y)
 	}
 
-	panic("No case in rectangleDistance")
+	return 0
 }
 
 func mergeCloseClusters(c []image.Rectangle, minDistance int) []image.Rectangle {

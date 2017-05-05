@@ -36,7 +36,7 @@ func RunTest(r *Result) error {
 		return errors.Wrap(err, "error getting storing diff image")
 	}
 
-	r.DiffClusters = clusterDiffImage(diffImg)
+	r.DiffClusters = naiveClusterer(diffImg)
 	r.DiffImageID = diffImageID
 	r.DiffScore = diffScore
 

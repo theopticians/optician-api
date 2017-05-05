@@ -15,7 +15,7 @@ func TestDiffImageClustering(t *testing.T) {
 	diffImg.SetAlpha(2, 1, color.Alpha{255})
 	diffImg.SetAlpha(3, 1, color.Alpha{255})
 
-	rect := clusterDiffImage(diffImg)
+	rect := naiveClusterer(diffImg)
 
 	fmt.Printf("%v \n", rect)
 }
