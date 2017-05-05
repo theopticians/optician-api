@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"math"
 )
 
 var NoPixelFoundErr = errors.New("No pixel found")
@@ -27,7 +28,7 @@ func clusterDiffImage(img image.Image) []image.Rectangle {
 		pix, err = findUnmaskedPixel(img, mask)
 	}
 
-	return mergeOverlappingClusters(clusters)
+	return mergeCloseClusters(mergeOverlappingClusters(clusters), 5)
 }
 
 // If needed, makes a rect bigger to fit the point
@@ -73,6 +74,49 @@ func mergeClustersByCondition(c []image.Rectangle, condition func(image.Rectangl
 func mergeOverlappingClusters(c []image.Rectangle) []image.Rectangle {
 	return mergeClustersByCondition(c, func(r1, r2 image.Rectangle) bool {
 		return r1.Overlaps(r2)
+	})
+}
+
+func dist(x1, y1, x2, y2 int) float64 {
+	dx := float64(x2 - x1)
+	dy := float64(y2 - y1)
+	return math.Sqrt(dx*dx + dy*dy)
+}
+
+func rectangleDistance(r1, r2 image.Rectangle) float64 {
+
+	if r1.Overlaps(r2) {
+		return 0
+	}
+
+	left := r2.Max.X < r1.Min.X
+	right := r1.Max.X < r2.Min.X
+	bottom := r2.Max.Y < r1.Min.Y
+	top := r1.Max.Y < r2.Min.Y
+	if top && left {
+		return dist(r1.Min.X, r1.Max.Y, r2.Max.X, r2.Min.Y)
+	} else if left && bottom {
+		return dist(r1.Min.X, r1.Min.Y, r2.Max.X, r2.Max.Y)
+	} else if bottom && right {
+		return dist(r1.Max.X, r1.Min.Y, r2.Min.X, r2.Max.Y)
+	} else if right && top {
+		return dist(r1.Max.X, r1.Max.Y, r2.Min.X, r2.Min.Y)
+	} else if left {
+		return float64(r1.Min.X - r2.Max.X)
+	} else if right {
+		return float64(r2.Min.X - r1.Max.X)
+	} else if bottom {
+		return float64(r1.Min.Y - r2.Max.Y)
+	} else if top {
+		return float64(r2.Min.Y - r1.Max.Y)
+	}
+
+	panic("No case in rectangleDistance")
+}
+
+func mergeCloseClusters(c []image.Rectangle, minDistance int) []image.Rectangle {
+	return mergeClustersByCondition(c, func(r1, r2 image.Rectangle) bool {
+		return rectangleDistance(r1, r2) < float64(minDistance)
 	})
 }
 
