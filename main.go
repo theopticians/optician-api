@@ -18,8 +18,8 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/cases", addCaseHandler).Methods("POST")
-	r.HandleFunc("/batchs", getBatchsHandler).Methods("GET")
-	r.HandleFunc("/batchs/{id}", getResultsByBatchHandler).Methods("GET")
+	r.HandleFunc("/batches", getBatchsHandler).Methods("GET")
+	r.HandleFunc("/batches/{id}", getResultsByBatchHandler).Methods("GET")
 	r.HandleFunc("/results", getResultsHandler).Methods("GET")
 	r.HandleFunc("/results/{id}", getResultHandler).Methods("GET")
 	r.HandleFunc("/results/{id}/accept", acceptHandler).Methods("POST")
