@@ -7,7 +7,7 @@ import (
 
 type Result struct {
 	ID           string            `json:"id"`
-	ProjectID    string            `json:"projectid"`
+	Project      string            `json:"project"`
 	Branch       string            `json:"branch"`
 	Batch        string            `json:"batch"`
 	Target       string            `json:"target"`
@@ -25,6 +25,7 @@ type BatchInfo struct {
 	ID        string    `json:"id"`
 	Timestamp time.Time `json:"timestamp"`
 	Failed    int       `json:"failed"`
+	Project   string    `json:"project"`
 }
 
 type Case struct {

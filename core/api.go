@@ -69,7 +69,7 @@ func AddCase(c Case) (Result, error) {
 
 	results := Result{
 		ID:          randID,
-		ProjectID:   projectID,
+		Project:     projectID,
 		Branch:      branch,
 		Batch:       c.Batch,
 		Target:      target,
@@ -98,7 +98,7 @@ func AcceptTest(testID string) error {
 		return err
 	}
 
-	lastTest, err := store.GetLastResult(test.ProjectID, test.Branch, test.Target, test.Browser)
+	lastTest, err := store.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
 
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func AcceptTest(testID string) error {
 		return errors.New("Cannot accept an old test. Last test is " + lastTest.ID)
 	}
 
-	return store.SetBaseImageID(test.ImageID, test.ProjectID, test.Branch, test.Target, test.Browser)
+	return store.SetBaseImageID(test.ImageID, test.Project, test.Branch, test.Target, test.Browser)
 }
 
 // IMAGES
@@ -134,7 +134,7 @@ func MaskTest(testID string, mask []image.Rectangle) (Result, error) {
 		return Result{}, err
 	}
 
-	lastTest, err := store.GetLastResult(test.ProjectID, test.Branch, test.Target, test.Browser)
+	lastTest, err := store.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
 
 	if err != nil {
 		return Result{}, err
@@ -149,7 +149,7 @@ func MaskTest(testID string, mask []image.Rectangle) (Result, error) {
 		return Result{}, err
 	}
 
-	err = store.SetBaseMaskID(maskID, test.ProjectID, test.Branch, test.Target, test.Browser)
+	err = store.SetBaseMaskID(maskID, test.Project, test.Branch, test.Target, test.Browser)
 	if err != nil {
 		return Result{}, err
 	}

@@ -196,7 +196,7 @@ func (s *BoltStore) GetBatchs() ([]BatchInfo, error) {
 				if t.DiffScore > 0 {
 					failed++
 				}
-				ret = append(ret, BatchInfo{t.Batch, t.Timestamp, failed})
+				ret = append(ret, BatchInfo{t.Batch, t.Timestamp, failed, t.Project})
 			}
 
 		}
@@ -224,7 +224,7 @@ func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (Re
 				return err
 			}
 
-			if t.ProjectID == projectID && t.Branch == branch && t.Target == target && t.Browser == browser {
+			if t.Project == projectID && t.Branch == branch && t.Target == target && t.Browser == browser {
 				if t.Timestamp.After(ret.Timestamp) {
 					ret = t
 				}

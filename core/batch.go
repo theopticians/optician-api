@@ -8,7 +8,7 @@ func batchHasTest(batch, projectID, branch, target, browser string) bool {
 	}
 
 	for i := 0; i < len(res); i++ {
-		if res[i].ProjectID == projectID && res[i].Branch == branch && res[i].Target == target && res[i].Browser == browser {
+		if res[i].Project == projectID && res[i].Branch == branch && res[i].Target == target && res[i].Browser == browser {
 			return true
 		}
 	}
