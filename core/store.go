@@ -1,10 +1,14 @@
 package core
 
-import "image"
+import (
+	"image"
+)
 
 type Store interface {
 	Close()
 	GetResults() ([]Result, error)
+	GetResultsByBatch(string) ([]Result, error)
+	GetBatchs() ([]BatchInfo, error)
 	GetResult(string) (Result, error)
 	GetLastResult(projectID, branch, target, browser string) (Result, error)
 	GetMask(string) ([]image.Rectangle, error)

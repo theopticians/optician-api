@@ -9,19 +9,41 @@ import (
 
 var store Store = NewBoltStore("optician.db")
 
+func Batchs() ([]BatchInfo, error) {
+	return store.GetBatchs()
+}
+
 // TESTS
 func Results() ([]Result, error) {
 	return store.GetResults()
 }
 
+func ResultsByBatchs(batch string) ([]Result, error) {
+	return store.GetResultsByBatch(batch)
+}
+
 func AddCase(c Case) (Result, error) {
-	randID := RandStringBytes(14)
 
 	testImage := c.Image
 	projectID := c.ProjectID
 	branch := c.Branch
 	target := c.Target
 	browser := c.Browser
+	batch := c.Batch
+
+	if batchIsOld(batch) {
+		return Result{}, errors.New("The batch " + batch + " is too old, start a new one")
+	}
+
+	if batchHasTest(batch, projectID, branch, target, browser) {
+		return Result{}, errors.New("The batch " + batch + " already has this test")
+	}
+
+	if batchHasDifferentBranch(batch, branch) {
+		return Result{}, errors.New("The same batch was used for a different branch. Only one branch can be tested in a batch")
+	}
+
+	randID := RandStringBytes(14)
 
 	imgID, err := store.StoreImage(testImage)
 
@@ -49,6 +71,7 @@ func AddCase(c Case) (Result, error) {
 		ID:          randID,
 		ProjectID:   projectID,
 		Branch:      branch,
+		Batch:       c.Batch,
 		Target:      target,
 		Browser:     browser,
 		ImageID:     imgID,

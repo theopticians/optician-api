@@ -127,6 +127,86 @@ func (s *BoltStore) GetResults() ([]Result, error) {
 	return ret, err
 }
 
+func (s *BoltStore) GetResultsByBatch(batch string) ([]Result, error) {
+
+	ret := []Result{}
+	err := s.db.View(func(tx *bolt.Tx) error {
+
+		b := tx.Bucket(resultsBucket)
+
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			r := Result{}
+
+			err := json.Unmarshal(v, &r)
+			if err != nil {
+				return err
+			}
+
+			if r.Batch == batch {
+				ret = append(ret, r)
+			}
+		}
+
+		return nil
+	})
+
+	sort.Slice(ret, func(i, j int) bool { return ret[i].Timestamp.After(ret[j].Timestamp) })
+
+	return ret, err
+}
+
+func (s *BoltStore) GetBatchs() ([]BatchInfo, error) {
+	ret := []BatchInfo{}
+
+	err := s.db.View(func(tx *bolt.Tx) error {
+
+		b := tx.Bucket(resultsBucket)
+
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+
+			var t Result
+
+			err := json.Unmarshal(v, &t)
+			if err != nil {
+				return err
+			}
+
+			found := -1
+			for i := 0; i < len(ret); i++ {
+				if ret[i].ID == t.Batch {
+					found = i
+					break
+				}
+			}
+
+			if found >= 0 {
+				if t.Timestamp.After(ret[found].Timestamp) {
+					ret[found].Timestamp = t.Timestamp
+				}
+
+				if t.DiffScore > 0 {
+					ret[found].Failed++
+				}
+			} else {
+				failed := 0
+				if t.DiffScore > 0 {
+					failed++
+				}
+				ret = append(ret, BatchInfo{t.Batch, t.Timestamp, failed})
+			}
+
+		}
+
+		return nil
+	})
+
+	return ret, err
+}
+
 func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (Result, error) {
 	ret := Result{}
 	err := s.db.View(func(tx *bolt.Tx) error {

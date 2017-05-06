@@ -18,6 +18,8 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/cases", addCaseHandler).Methods("POST")
+	r.HandleFunc("/batchs", getBatchsHandler).Methods("GET")
+	r.HandleFunc("/batchs/{id}", getResultsByBatchHandler).Methods("GET")
 	r.HandleFunc("/results", getResultsHandler).Methods("GET")
 	r.HandleFunc("/results/{id}", getResultHandler).Methods("GET")
 	r.HandleFunc("/results/{id}/accept", acceptHandler).Methods("POST")
@@ -33,6 +35,48 @@ func middleware(h http.Handler) http.Handler {
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		h.ServeHTTP(rw, req)
 	})
+}
+
+func getBatchsHandler(rw http.ResponseWriter, req *http.Request) {
+	batchs, err := core.Batchs()
+
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	trJSON, err := json.Marshal(batchs)
+
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	rw.Write(trJSON)
+}
+
+func getResultsByBatchHandler(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
+	tests, err := core.ResultsByBatchs(id)
+
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	trJSON, err := json.Marshal(tests)
+
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte(err.Error()))
+		return
+	}
+
+	rw.Write(trJSON)
 }
 
 func getResultsHandler(rw http.ResponseWriter, req *http.Request) {

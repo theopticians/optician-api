@@ -21,6 +21,12 @@ type Result struct {
 	Timestamp    time.Time         `json:"timestamp"`
 }
 
+type BatchInfo struct {
+	ID        string    `json:"id"`
+	Timestamp time.Time `json:"timestamp"`
+	Failed    int       `json:"failed"`
+}
+
 type Case struct {
 	ProjectID string `json:"projectid"`
 	Branch    string `json:"branch"`
