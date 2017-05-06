@@ -17,17 +17,18 @@ func naiveClusterer(img image.Image) []image.Rectangle {
 	var err error
 	clusters := []image.Rectangle{}
 
-	var pix image.Point
-	pix, err = findUnmaskedPixel(img, mask)
+	pix := image.Point{}
+	pix, err = findUnmaskedPixel(img, mask, pix)
 
 	for err == nil {
-		pixels := findAdjacentPixels(img, pix, mask)
+		pixels := []image.Point{}
+		findAdjacentPixels(img, pix, mask, &pixels)
 		if len(pixels) == 0 {
 			panic("No pixels returned by adjacent pixels")
 		}
 		cluster := pointsBounds(pixels)
 		clusters = append(clusters, cluster)
-		pix, err = findUnmaskedPixel(img, mask)
+		pix, err = findUnmaskedPixel(img, mask, pix)
 	}
 
 	return mergeCloseClusters(mergeOverlappingClusters(clusters), 5)
@@ -139,40 +140,44 @@ func getAlpha(color color.Color) int {
 	return int(a)
 }
 
-func findAdjacentPixels(img image.Image, start image.Point, mask *image.Alpha) []image.Point {
+func findAdjacentPixels(img image.Image, start image.Point, mask *image.Alpha, pixels *[]image.Point) {
 	if !start.In(img.Bounds()) || mask.AlphaAt(start.X, start.Y).A != 0 {
-		return []image.Point{}
+		return
 	}
 
 	if getAlpha(img.At(start.X, start.Y)) == 0 {
-		return []image.Point{}
+		return
 	}
 
 	mask.SetAlpha(start.X, start.Y, color.Alpha{255})
 
-	pixels := []image.Point{start}
+	*pixels = append(*pixels, start)
 
-	pixels = append(pixels, findAdjacentPixels(img, image.Point{start.X - 1, start.Y}, mask)...)
-	pixels = append(pixels, findAdjacentPixels(img, image.Point{start.X + 1, start.Y}, mask)...)
-	pixels = append(pixels, findAdjacentPixels(img, image.Point{start.X, start.Y + 1}, mask)...)
-	pixels = append(pixels, findAdjacentPixels(img, image.Point{start.X, start.Y - 1}, mask)...)
-
-	return pixels
+	findAdjacentPixels(img, image.Point{start.X - 1, start.Y}, mask, pixels)
+	findAdjacentPixels(img, image.Point{start.X + 1, start.Y}, mask, pixels)
+	findAdjacentPixels(img, image.Point{start.X, start.Y + 1}, mask, pixels)
+	findAdjacentPixels(img, image.Point{start.X, start.Y - 1}, mask, pixels)
 }
 
-func findUnmaskedPixel(img image.Image, mask *image.Alpha) (image.Point, error) {
+func findUnmaskedPixel(img image.Image, mask *image.Alpha, start image.Point) (image.Point, error) {
 	if !img.Bounds().Eq(mask.Bounds()) {
 		return image.Point{}, errors.New("Image and mask have different bounds")
 	}
 
-	for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
-		for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+	sx := start.X
+
+	for y := start.Y; y < img.Bounds().Max.Y; y++ {
+		for x := sx; x < img.Bounds().Max.X; x++ {
 			_, _, _, ia := img.At(x, y).RGBA()
-			_, _, _, ma := mask.At(x, y).RGBA()
-			if ia > 0 && ma == 0 {
-				return image.Point{x, y}, nil
+			if ia > 0 {
+				_, _, _, ma := mask.At(x, y).RGBA()
+				if ma == 0 {
+					return image.Point{x, y}, nil
+				}
 			}
 		}
+
+		sx = img.Bounds().Min.X
 	}
 
 	return image.Point{}, NoPixelFoundErr
