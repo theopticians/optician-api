@@ -4,6 +4,8 @@ import (
 	"image"
 	"os"
 	"testing"
+
+	stores "github.com/theopticians/optician-api/core/store"
 )
 
 var (
@@ -23,7 +25,7 @@ func readImage(path string) image.Image {
 	return im
 }
 
-func testStore(t *testing.T, newStore func() Store) {
+func testStore(t *testing.T, newStore func() stores.Store) {
 
 	t.Run("image storage", func(t *testing.T) {
 		s := newStore()

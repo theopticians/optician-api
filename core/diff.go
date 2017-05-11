@@ -10,12 +10,12 @@ import (
 
 func RunTest(r *structs.Result) error {
 
-	baseImg, err := store.GetImage(r.BaseImageID)
+	baseImg, err := db.GetImage(r.BaseImageID)
 	if err != nil {
 		return errors.Wrap(err, "error getting base image")
 	}
 
-	testImg, err := store.GetImage(r.ImageID)
+	testImg, err := db.GetImage(r.ImageID)
 	if err != nil {
 		return errors.Wrap(err, "error getting test image")
 	}
@@ -24,7 +24,7 @@ func RunTest(r *structs.Result) error {
 	if r.MaskID == "nomask" {
 		mask = []image.Rectangle{}
 	} else {
-		mask, err = store.GetMask(r.MaskID)
+		mask, err = db.GetMask(r.MaskID)
 		if err != nil {
 			return errors.Wrap(err, "error getting mask")
 		}
@@ -32,7 +32,7 @@ func RunTest(r *structs.Result) error {
 
 	diffImg, diffScore := computeDiffImage(baseImg, testImg, mask)
 
-	diffImageID, err := store.StoreImage(diffImg)
+	diffImageID, err := db.StoreImage(diffImg)
 
 	if err != nil {
 		return errors.Wrap(err, "error getting storing diff image")

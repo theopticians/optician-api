@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/theopticians/optician-api/core"
+	"github.com/theopticians/optician-api/core/store"
 	"github.com/theopticians/optician-api/core/structs"
 )
 
@@ -133,7 +134,7 @@ func getResultHandler(rw http.ResponseWriter, req *http.Request) {
 	if id != "" {
 		results, err = core.GetTest(id)
 		if err != nil {
-			if err == core.KeyNotFoundError {
+			if err == store.NotFoundError {
 				rw.WriteHeader(http.StatusNotFound)
 				return
 			}
@@ -163,7 +164,7 @@ func acceptHandler(w http.ResponseWriter, r *http.Request) {
 	err := core.AcceptTest(id)
 
 	if err != nil {
-		if err == core.KeyNotFoundError {
+		if err == store.NotFoundError {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -194,7 +195,7 @@ func maskHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = core.MaskTest(id, []image.Rectangle(*m))
 
 	if err != nil {
-		if err == core.KeyNotFoundError {
+		if err == store.NotFoundError {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}

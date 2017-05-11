@@ -1,10 +1,13 @@
-package core
+package store
 
 import (
+	"errors"
 	"image"
 
 	"github.com/theopticians/optician-api/core/structs"
 )
+
+var NotFoundError = errors.New("Not found in DB")
 
 type Store interface {
 	Close()

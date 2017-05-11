@@ -1,14 +1,14 @@
-package core
+package bolt
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"image"
 	"image/png"
 	"sort"
 
 	"github.com/boltdb/bolt"
+	"github.com/theopticians/optician-api/core/store"
 	"github.com/theopticians/optician-api/core/structs"
 )
 
@@ -20,13 +20,11 @@ var (
 	masksBucket      = []byte("masks")
 )
 
-var KeyNotFoundError = errors.New("Key not found in DB")
-
 type BoltStore struct {
 	db *bolt.DB
 }
 
-func NewBoltStore(path string) Store {
+func NewBoltStore(path string) store.Store {
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		panic(err)
@@ -79,7 +77,7 @@ func (s *BoltStore) getValue(bucket []byte, key string) ([]byte, error) {
 	}
 
 	if results == nil {
-		return nil, KeyNotFoundError
+		return nil, store.NotFoundError
 	}
 
 	return results, nil
@@ -273,7 +271,7 @@ func (s *BoltStore) GetMask(id string) ([]image.Rectangle, error) {
 	key := id
 	serialized, err := s.getValue(masksBucket, key)
 	if err != nil {
-		if err == KeyNotFoundError {
+		if err == store.NotFoundError {
 			return []image.Rectangle{}, nil
 		}
 		return nil, err

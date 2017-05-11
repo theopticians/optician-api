@@ -1,7 +1,7 @@
 package core
 
 func batchHasTest(batch, projectID, branch, target, browser string) bool {
-	res, err := store.GetResultsByBatch(batch)
+	res, err := db.GetResultsByBatch(batch)
 
 	if err != nil {
 		return false
@@ -21,7 +21,7 @@ func batchIsOld(batch string) bool {
 }
 
 func batchHasDifferentBranch(batch, branch string) bool {
-	res, err := store.GetResultsByBatch(batch)
+	res, err := db.GetResultsByBatch(batch)
 
 	if err != nil {
 		return false

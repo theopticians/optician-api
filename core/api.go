@@ -5,22 +5,24 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/theopticians/optician-api/core/store"
+	"github.com/theopticians/optician-api/core/store/bolt"
 	"github.com/theopticians/optician-api/core/structs"
 )
 
-var store Store = NewBoltStore("optician.db")
+var db store.Store = bolt.NewBoltStore("optician.db")
 
 func Batchs() ([]structs.BatchInfo, error) {
-	return store.GetBatchs()
+	return db.GetBatchs()
 }
 
 // TESTS
 func Results() ([]structs.Result, error) {
-	return store.GetResults()
+	return db.GetResults()
 }
 
 func ResultsByBatchs(batch string) ([]structs.Result, error) {
-	return store.GetResultsByBatch(batch)
+	return db.GetResultsByBatch(batch)
 }
 
 func AddCase(c structs.Case) (structs.Result, error) {
@@ -46,22 +48,22 @@ func AddCase(c structs.Case) (structs.Result, error) {
 
 	randID := RandStringBytes(14)
 
-	imgID, err := store.StoreImage(testImage)
+	imgID, err := db.StoreImage(testImage)
 
-	baseImgID, err := store.GetBaseImageID(projectID, branch, target, browser)
+	baseImgID, err := db.GetBaseImageID(projectID, branch, target, browser)
 	if err != nil {
-		if err == KeyNotFoundError {
+		if err == store.NotFoundError {
 			// IF no base image found, set this as base image
 			baseImgID = imgID
-			store.SetBaseImageID(baseImgID, projectID, branch, target, browser)
+			db.SetBaseImageID(baseImgID, projectID, branch, target, browser)
 		} else {
 			return structs.Result{}, errors.Wrap(err, "error getting base image ID")
 		}
 	}
 
-	maskID, err := store.GetBaseMaskID(projectID, branch, target, browser)
+	maskID, err := db.GetBaseMaskID(projectID, branch, target, browser)
 	if err != nil {
-		if err == KeyNotFoundError {
+		if err == store.NotFoundError {
 			maskID = "nomask"
 		} else {
 			return structs.Result{}, errors.Wrap(err, "error getting base mask id")
@@ -83,23 +85,23 @@ func AddCase(c structs.Case) (structs.Result, error) {
 
 	err = RunTest(&results)
 
-	err = store.StoreResult(results)
+	err = db.StoreResult(results)
 
 	return results, err
 }
 
 func GetTest(id string) (structs.Result, error) {
-	return store.GetResult(id)
+	return db.GetResult(id)
 }
 
 func AcceptTest(testID string) error {
-	test, err := store.GetResult(testID)
+	test, err := db.GetResult(testID)
 
 	if err != nil {
 		return err
 	}
 
-	lastTest, err := store.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
+	lastTest, err := db.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
 
 	if err != nil {
 		return err
@@ -109,13 +111,13 @@ func AcceptTest(testID string) error {
 		return errors.New("Cannot accept an old test. Last test is " + lastTest.ID)
 	}
 
-	return store.SetBaseImageID(test.ImageID, test.Project, test.Branch, test.Target, test.Browser)
+	return db.SetBaseImageID(test.ImageID, test.Project, test.Branch, test.Target, test.Browser)
 }
 
 // IMAGES
 
 func GetImage(id string) image.Image {
-	img, err := store.GetImage(id)
+	img, err := db.GetImage(id)
 	if err != nil {
 		panic(err)
 	}
@@ -126,7 +128,7 @@ func GetImage(id string) image.Image {
 // MASKS
 
 func GetMask(id string) ([]image.Rectangle, error) {
-	return store.GetMask(id)
+	return db.GetMask(id)
 }
 
 func MaskTest(testID string, mask []image.Rectangle) (structs.Result, error) {
@@ -135,7 +137,7 @@ func MaskTest(testID string, mask []image.Rectangle) (structs.Result, error) {
 		return structs.Result{}, err
 	}
 
-	lastTest, err := store.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
+	lastTest, err := db.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
 
 	if err != nil {
 		return structs.Result{}, err
@@ -145,12 +147,12 @@ func MaskTest(testID string, mask []image.Rectangle) (structs.Result, error) {
 		return structs.Result{}, errors.New("Cannot add masks based on an old test")
 	}
 
-	maskID, err := store.StoreMask(mask)
+	maskID, err := db.StoreMask(mask)
 	if err != nil {
 		return structs.Result{}, err
 	}
 
-	err = store.SetBaseMaskID(maskID, test.Project, test.Branch, test.Target, test.Browser)
+	err = db.SetBaseMaskID(maskID, test.Project, test.Branch, test.Target, test.Browser)
 	if err != nil {
 		return structs.Result{}, err
 	}
@@ -162,7 +164,7 @@ func MaskTest(testID string, mask []image.Rectangle) (structs.Result, error) {
 		return structs.Result{}, err
 	}
 
-	err = store.StoreResult(test)
+	err = db.StoreResult(test)
 
 	if err != nil {
 		return structs.Result{}, err
