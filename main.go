@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/theopticians/optician-api/core"
+	"github.com/theopticians/optician-api/core/structs"
 )
 
 func main() {
@@ -111,7 +112,7 @@ func addCaseHandler(rw http.ResponseWriter, req *http.Request) {
 
 	defer req.Body.Close()
 
-	results, err := core.AddCase(core.Case(c))
+	results, err := core.AddCase(structs.Case(c))
 
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -124,7 +125,7 @@ func addCaseHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 func getResultHandler(rw http.ResponseWriter, req *http.Request) {
-	var results core.Result
+	var results structs.Result
 	var err error
 	vars := mux.Vars(req)
 	id := vars["id"]

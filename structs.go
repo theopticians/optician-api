@@ -5,10 +5,11 @@ import (
 	"image"
 
 	"github.com/theopticians/optician-api/core"
+	"github.com/theopticians/optician-api/core/structs"
 )
 
-type ApiResult core.Result
-type ApiCase core.Case
+type ApiResult structs.Result
+type ApiCase structs.Case
 type ApiRect []image.Rectangle
 
 func (u *ApiCase) UnmarshalJSON(data []byte) error {

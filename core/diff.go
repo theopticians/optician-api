@@ -1,12 +1,14 @@
 package core
 
 import (
-	"github.com/pkg/errors"
 	"image"
 	"image/color"
+
+	"github.com/pkg/errors"
+	"github.com/theopticians/optician-api/core/structs"
 )
 
-func RunTest(r *Result) error {
+func RunTest(r *structs.Result) error {
 
 	baseImg, err := store.GetImage(r.BaseImageID)
 	if err != nil {

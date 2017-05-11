@@ -5,24 +5,25 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/theopticians/optician-api/core/structs"
 )
 
 var store Store = NewBoltStore("optician.db")
 
-func Batchs() ([]BatchInfo, error) {
+func Batchs() ([]structs.BatchInfo, error) {
 	return store.GetBatchs()
 }
 
 // TESTS
-func Results() ([]Result, error) {
+func Results() ([]structs.Result, error) {
 	return store.GetResults()
 }
 
-func ResultsByBatchs(batch string) ([]Result, error) {
+func ResultsByBatchs(batch string) ([]structs.Result, error) {
 	return store.GetResultsByBatch(batch)
 }
 
-func AddCase(c Case) (Result, error) {
+func AddCase(c structs.Case) (structs.Result, error) {
 
 	testImage := c.Image
 	projectID := c.ProjectID
@@ -32,15 +33,15 @@ func AddCase(c Case) (Result, error) {
 	batch := c.Batch
 
 	if batchIsOld(batch) {
-		return Result{}, errors.New("The batch " + batch + " is too old, start a new one")
+		return structs.Result{}, errors.New("The batch " + batch + " is too old, start a new one")
 	}
 
 	if batchHasTest(batch, projectID, branch, target, browser) {
-		return Result{}, errors.New("The batch " + batch + " already has this test")
+		return structs.Result{}, errors.New("The batch " + batch + " already has this test")
 	}
 
 	if batchHasDifferentBranch(batch, branch) {
-		return Result{}, errors.New("The same batch was used for a different branch. Only one branch can be tested in a batch")
+		return structs.Result{}, errors.New("The same batch was used for a different branch. Only one branch can be tested in a batch")
 	}
 
 	randID := RandStringBytes(14)
@@ -54,7 +55,7 @@ func AddCase(c Case) (Result, error) {
 			baseImgID = imgID
 			store.SetBaseImageID(baseImgID, projectID, branch, target, browser)
 		} else {
-			return Result{}, errors.Wrap(err, "error getting base image ID")
+			return structs.Result{}, errors.Wrap(err, "error getting base image ID")
 		}
 	}
 
@@ -63,11 +64,11 @@ func AddCase(c Case) (Result, error) {
 		if err == KeyNotFoundError {
 			maskID = "nomask"
 		} else {
-			return Result{}, errors.Wrap(err, "error getting base mask id")
+			return structs.Result{}, errors.Wrap(err, "error getting base mask id")
 		}
 	}
 
-	results := Result{
+	results := structs.Result{
 		ID:          randID,
 		Project:     projectID,
 		Branch:      branch,
@@ -87,7 +88,7 @@ func AddCase(c Case) (Result, error) {
 	return results, err
 }
 
-func GetTest(id string) (Result, error) {
+func GetTest(id string) (structs.Result, error) {
 	return store.GetResult(id)
 }
 
@@ -128,43 +129,43 @@ func GetMask(id string) ([]image.Rectangle, error) {
 	return store.GetMask(id)
 }
 
-func MaskTest(testID string, mask []image.Rectangle) (Result, error) {
+func MaskTest(testID string, mask []image.Rectangle) (structs.Result, error) {
 	test, err := GetTest(testID)
 	if err != nil {
-		return Result{}, err
+		return structs.Result{}, err
 	}
 
 	lastTest, err := store.GetLastResult(test.Project, test.Branch, test.Target, test.Browser)
 
 	if err != nil {
-		return Result{}, err
+		return structs.Result{}, err
 	}
 
 	if testID != lastTest.ID {
-		return Result{}, errors.New("Cannot add masks based on an old test")
+		return structs.Result{}, errors.New("Cannot add masks based on an old test")
 	}
 
 	maskID, err := store.StoreMask(mask)
 	if err != nil {
-		return Result{}, err
+		return structs.Result{}, err
 	}
 
 	err = store.SetBaseMaskID(maskID, test.Project, test.Branch, test.Target, test.Browser)
 	if err != nil {
-		return Result{}, err
+		return structs.Result{}, err
 	}
 
 	test.MaskID = maskID
 
 	err = RunTest(&test)
 	if err != nil {
-		return Result{}, err
+		return structs.Result{}, err
 	}
 
 	err = store.StoreResult(test)
 
 	if err != nil {
-		return Result{}, err
+		return structs.Result{}, err
 	}
 
 	return test, nil

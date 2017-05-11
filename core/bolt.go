@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/boltdb/bolt"
+	"github.com/theopticians/optician-api/core/structs"
 )
 
 var (
@@ -100,8 +101,8 @@ func (s *BoltStore) storeValue(bucket []byte, key string, value []byte) error {
 	return err
 }
 
-func (s *BoltStore) GetResults() ([]Result, error) {
-	ret := []Result{}
+func (s *BoltStore) GetResults() ([]structs.Result, error) {
+	ret := []structs.Result{}
 	err := s.db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket(resultsBucket)
@@ -109,7 +110,7 @@ func (s *BoltStore) GetResults() ([]Result, error) {
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			r := Result{}
+			r := structs.Result{}
 
 			err := json.Unmarshal(v, &r)
 			if err != nil {
@@ -127,9 +128,9 @@ func (s *BoltStore) GetResults() ([]Result, error) {
 	return ret, err
 }
 
-func (s *BoltStore) GetResultsByBatch(batch string) ([]Result, error) {
+func (s *BoltStore) GetResultsByBatch(batch string) ([]structs.Result, error) {
 
-	ret := []Result{}
+	ret := []structs.Result{}
 	err := s.db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket(resultsBucket)
@@ -137,7 +138,7 @@ func (s *BoltStore) GetResultsByBatch(batch string) ([]Result, error) {
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			r := Result{}
+			r := structs.Result{}
 
 			err := json.Unmarshal(v, &r)
 			if err != nil {
@@ -157,8 +158,8 @@ func (s *BoltStore) GetResultsByBatch(batch string) ([]Result, error) {
 	return ret, err
 }
 
-func (s *BoltStore) GetBatchs() ([]BatchInfo, error) {
-	ret := []BatchInfo{}
+func (s *BoltStore) GetBatchs() ([]structs.BatchInfo, error) {
+	ret := []structs.BatchInfo{}
 
 	err := s.db.View(func(tx *bolt.Tx) error {
 
@@ -168,7 +169,7 @@ func (s *BoltStore) GetBatchs() ([]BatchInfo, error) {
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 
-			var t Result
+			var t structs.Result
 
 			err := json.Unmarshal(v, &t)
 			if err != nil {
@@ -196,7 +197,7 @@ func (s *BoltStore) GetBatchs() ([]BatchInfo, error) {
 				if t.DiffScore > 0 {
 					failed++
 				}
-				ret = append(ret, BatchInfo{t.Batch, t.Timestamp, failed, t.Project})
+				ret = append(ret, structs.BatchInfo{t.Batch, t.Timestamp, failed, t.Project})
 			}
 
 		}
@@ -207,8 +208,8 @@ func (s *BoltStore) GetBatchs() ([]BatchInfo, error) {
 	return ret, err
 }
 
-func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (Result, error) {
-	ret := Result{}
+func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (structs.Result, error) {
+	ret := structs.Result{}
 	err := s.db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket(resultsBucket)
@@ -217,7 +218,7 @@ func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (Re
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 
-			var t Result
+			var t structs.Result
 
 			err := json.Unmarshal(v, &t)
 			if err != nil {
@@ -237,7 +238,7 @@ func (s *BoltStore) GetLastResult(projectID, branch, target, browser string) (Re
 	return ret, err
 }
 
-func (s *BoltStore) StoreResult(r Result) error {
+func (s *BoltStore) StoreResult(r structs.Result) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists(resultsBucket)
 		if err != nil {
@@ -254,10 +255,10 @@ func (s *BoltStore) StoreResult(r Result) error {
 
 }
 
-func (s *BoltStore) GetResult(ID string) (Result, error) {
+func (s *BoltStore) GetResult(ID string) (structs.Result, error) {
 	val, err := s.getValue(resultsBucket, ID)
 
-	res := Result{}
+	res := structs.Result{}
 
 	if err != nil {
 		return res, err
