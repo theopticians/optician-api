@@ -267,7 +267,7 @@ func (s *BoltStore) GetResult(ID string) (structs.Result, error) {
 	return res, err
 }
 
-func (s *BoltStore) GetMask(id string) ([]image.Rectangle, error) {
+func (s *BoltStore) GetMask(id string) (structs.Mask, error) {
 	key := id
 	serialized, err := s.getValue(masksBucket, key)
 	if err != nil {
@@ -287,7 +287,7 @@ func (s *BoltStore) GetMask(id string) ([]image.Rectangle, error) {
 	return ret, nil
 }
 
-func (s *BoltStore) StoreMask(masks []image.Rectangle) (string, error) {
+func (s *BoltStore) StoreMask(masks structs.Mask) (string, error) {
 	key := RandStringBytes(10)
 
 	serialized, err := json.Marshal(masks)

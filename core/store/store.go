@@ -19,8 +19,8 @@ type Store interface {
 
 	GetBatchs() ([]structs.BatchInfo, error)
 
-	GetMask(string) ([]image.Rectangle, error)
-	StoreMask(masks []image.Rectangle) (string, error)
+	GetMask(string) (structs.Mask, error)
+	StoreMask(masks structs.Mask) (string, error)
 
 	GetImage(string) (image.Image, error)
 	StoreImage(image.Image) (string, error)

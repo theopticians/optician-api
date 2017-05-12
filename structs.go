@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"image"
 
 	"github.com/theopticians/optician-api/core"
 	"github.com/theopticians/optician-api/core/structs"
@@ -10,7 +9,6 @@ import (
 
 type ApiResult structs.Result
 type ApiCase structs.Case
-type ApiRect []image.Rectangle
 
 func (u *ApiCase) UnmarshalJSON(data []byte) error {
 	type Alias ApiCase
@@ -38,56 +36,11 @@ func (r *ApiResult) MarshalJSON() ([]byte, error) {
 
 	type Alias ApiResult
 	return json.Marshal(&struct {
-		Mask         ApiRect `json:"mask"`
-		DiffClusters ApiRect `json:"diffclusters"`
-		MaskID       string  `json:"-"`
+		Mask   structs.Mask `json:"mask"`
+		MaskID string       `json:"-"`
 		*Alias
 	}{
-		Mask:         ApiRect(mask),
-		DiffClusters: ApiRect(r.DiffClusters),
-		Alias:        (*Alias)(r),
+		Mask:  structs.Mask(mask),
+		Alias: (*Alias)(r),
 	})
-}
-
-func (m *ApiRect) UnmarshalJSON(data []byte) error {
-
-	aux := []struct {
-		X      int `json:"x"`
-		Y      int `json:"y"`
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}{}
-
-	err := json.Unmarshal(data, &aux)
-	if err != nil {
-		return err
-	}
-
-	newMask := ApiRect(make([]image.Rectangle, len(aux)))
-
-	for i := 0; i < len(aux); i++ {
-		newMask[i].Min = image.Point{X: aux[i].X, Y: aux[i].Y}
-		newMask[i].Max = image.Point{X: aux[i].X + aux[i].Width, Y: aux[i].Y + aux[i].Height}
-	}
-
-	*m = newMask
-	return nil
-}
-
-func (m ApiRect) MarshalJSON() ([]byte, error) {
-	aux := make([]struct {
-		X      int `json:"x"`
-		Y      int `json:"y"`
-		Width  int `json:"width"`
-		Height int `json:"height"`
-	}, len(m))
-
-	for i := 0; i < len(aux); i++ {
-		aux[i].X = m[i].Min.X
-		aux[i].Y = m[i].Min.Y
-		aux[i].Width = m[i].Dx()
-		aux[i].Height = m[i].Dy()
-	}
-
-	return json.Marshal(&aux)
 }
