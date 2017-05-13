@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/theopticians/optician-api/core"
+	"github.com/theopticians/optician-api/core/store"
 	"github.com/theopticians/optician-api/core/structs"
 )
 
@@ -30,7 +31,9 @@ func (u *ApiCase) UnmarshalJSON(data []byte) error {
 
 func (r *ApiResult) MarshalJSON() ([]byte, error) {
 	mask, err := core.GetMask(r.MaskID)
-	if err != nil {
+	if err == store.NotFoundError {
+		mask = structs.Mask{}
+	} else if err != nil {
 		return nil, err
 	}
 
