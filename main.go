@@ -29,7 +29,7 @@ func main() {
 	r.HandleFunc("/image/{id}", imageHandler).Methods("GET")
 
 	http.Handle("/", middleware(r))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":9000", nil))
 }
 
 func middleware(h http.Handler) http.Handler {
