@@ -6,11 +6,12 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/theopticians/optician-api/core/store"
-	"github.com/theopticians/optician-api/core/store/sql"
+	"github.com/theopticians/optician-api/core/store/bolt"
 	"github.com/theopticians/optician-api/core/structs"
 )
 
-var db store.Store = sql.NewSqlStore("postgres", "postgresql://root@localhost:26257/optician?sslmode=disable")
+//var db store.Store = sql.NewSqlStore("postgres", "postgresql://root@localhost:26257/optician?sslmode=disable")
+var db store.Store = bolt.NewBoltStore("./optician.db")
 
 func Batchs() ([]structs.BatchInfo, error) {
 	return db.GetBatchs()
