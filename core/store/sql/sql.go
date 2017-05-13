@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"image"
-	"image/jpeg"
+	"image/png"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -181,7 +181,7 @@ func (s *SqlStore) StoreImage(img image.Image) (string, error) {
 	id := RandStringBytes(10)
 
 	buf := new(bytes.Buffer)
-	err := jpeg.Encode(buf, img, nil)
+	err := png.Encode(buf, img)
 	if err != nil {
 		return "", err
 	}
