@@ -29,6 +29,7 @@ func main() {
 	r.HandleFunc("/image/{id}", imageHandler).Methods("GET")
 
 	http.Handle("/", middleware(r))
+	log.Println("Server started at port 9000")
 	log.Fatal(http.ListenAndServe(":9000", nil))
 }
 
