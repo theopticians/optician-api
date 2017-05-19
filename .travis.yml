@@ -1,10 +1,10 @@
 language: go
 
 go:
-	- tip
+	- 1.8
 
-before_install:
-  - go get ./...
+install:
+  - go get -t ./...
 
 script:
   - go test -v ./...
