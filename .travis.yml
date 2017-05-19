@@ -1,0 +1,18 @@
+language: go
+
+go:
+	- tip
+
+before_install:
+  - go get ./...
+
+script:
+  - go test -v ./...
+
+after_success:
+	- if [ "$TRAVIS_BRANCH" == "master" ]; then
+		docker build -t optician-api .;
+		docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD";
+		docker tag optician-api theopticians/optician-api;
+		docker push theopticians/optician-api;
+		fi
