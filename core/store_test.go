@@ -25,7 +25,7 @@ func readImage(path string) image.Image {
 	return im
 }
 
-func testStore(t *testing.T, newStore func() stores.Store) {
+func GenericTestStore(t *testing.T, newStore func() stores.Store) {
 
 	t.Run("image storage", func(t *testing.T) {
 		s := newStore()

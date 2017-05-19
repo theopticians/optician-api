@@ -1,11 +1,6 @@
 package core
 
-import (
-	"fmt"
-	"image"
-	"image/color"
-	"testing"
-)
+/*
 
 func TestDiffImageClustering(t *testing.T) {
 	diffImg := image.NewAlpha(image.Rect(0, 0, 4, 4))
@@ -17,7 +12,6 @@ func TestDiffImageClustering(t *testing.T) {
 
 	rect := naiveClusterer(diffImg)
 
-	fmt.Printf("%v \n", rect)
 }
 
 func TestPointsBounds(t *testing.T) {
@@ -25,6 +19,6 @@ func TestPointsBounds(t *testing.T) {
 		image.Point{3, 3},
 		image.Point{7, 9},
 	}
-
-	fmt.Println(pointsBounds(points))
 }
+
+*/
