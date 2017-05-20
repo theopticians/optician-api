@@ -1,17 +1,14 @@
 #build stage
-FROM golang:latest AS build-env
+FROM golang:latest AS build
 
-RUN mkdir -p /go/src/github.com/theopticians/optician-api 
-ADD . /go/src/github.com/theopticians/optician-api/
 WORKDIR /go/src/github.com/theopticians/optician-api 
+ADD . .
 RUN go get ./...
 RUN go install
-CMD ["/go/bin/optician-api"]
 
 
 # final stage
-FROM alpine
-
-WORKDIR /app
-COPY --from=build-env /go/bin/optician-api /app/
-ENTRYPOINT ./optician-api
+FROM debian:jessie-slim 
+WORKDIR /app/
+COPY --from=build /go/bin/optician-api .
+CMD ["./optician-api"]  
