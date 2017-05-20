@@ -18,50 +18,50 @@ import (
 
 var schema = `
 	CREATE TABLE IF NOT EXISTS masks (
-		id string,
-		mask text,
+		id STRING,
+		mask TEXT,
 		PRIMARY KEY( id )
 	);
 
 	CREATE TABLE IF NOT EXISTS images (
-		id string,
-		image bytea,
+		id STRING,
+		image BYTEA,
 		PRIMARY KEY( id )
 	);
 
 	CREATE TABLE IF NOT EXISTS results (
-		id string,
-		project string,
-		branch string,
-		batch string,
-		target string,
-		browser string,
-		maskid string,
-		diffscore float,
-		imageid string,
-		baseimageid string,
-		diffimageid string,
-		diffclusters string,
-		timestamp date,
+		id STRING,
+		project STRING,
+		branch STRING,
+		batch STRING,
+		target STRING,
+		browser STRING,
+		maskid STRING,
+		diffscore FLOAT,
+		imageid STRING,
+		baseimageid STRING,
+		diffimageid STRING,
+		diffclusters STRING,
+		timestamp TIMESTAMP,
 		PRIMARY KEY( id ),
 		CONSTRAINT UQ_result UNIQUE ( project, branch, batch, target, browser )
 	);
 
 	CREATE TABLE IF NOT EXISTS base_images (
-		project string,
-		branch string,
-		target string,
-		browser string,
-		imageid string,
+		project STRING,
+		branch STRING,
+		target STRING,
+		browser STRING,
+		imageid STRING,
 		PRIMARY KEY( project, branch,target, browser )
 	);
 
 	CREATE TABLE IF NOT EXISTS base_masks (
-		project string,
-		branch string,
-		target string,
-		browser string,
-		maskid string,
+		project STRING,
+		branch STRING,
+		target STRING,
+		browser STRING,
+		maskid STRING,
 		PRIMARY KEY( project, branch,target, browser )
 	);
 `
