@@ -1,10 +1,13 @@
+dist: trusty
+sudo: required
+
 language: go
 
 go:
   - 1.8
 
-services:
-  - docker
+before_install:
+  - sudo apt-get install --yes -qq docker docker-engine
 
 install:
   - go get -t ./...
