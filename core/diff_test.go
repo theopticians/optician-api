@@ -6,7 +6,7 @@ import (
 )
 
 func TestBinDiff(t *testing.T) {
-	_, diffPixels, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{})
+	_, diffPixels, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{}, 0)
 
 	if err != nil {
 		t.Fatal("Error comparing images:", err)
@@ -16,7 +16,7 @@ func TestBinDiff(t *testing.T) {
 		t.Fatal("Expected number of pixel differences between testImg1 and testImg2 to be 33454, got ", diffPixels)
 	}
 
-	_, diffPixels, err = compareImagesBin(testImg1, testImg1, []image.Rectangle{})
+	_, diffPixels, err = compareImagesBin(testImg1, testImg1, []image.Rectangle{}, 0)
 
 	if err != nil {
 		t.Fatal("Error comparing images:", err)
@@ -28,7 +28,7 @@ func TestBinDiff(t *testing.T) {
 }
 
 func TestBinDiffMaskInvalid(t *testing.T) {
-	_, _, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{testMask1, testMaskInvalid})
+	_, _, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{testMask1, testMaskInvalid}, 0)
 
 	if err == nil {
 		t.Fatal("Expected compareImagesBin to return error when passed invalid mask")
@@ -37,7 +37,7 @@ func TestBinDiffMaskInvalid(t *testing.T) {
 }
 
 func TestBinDiffMask(t *testing.T) {
-	_, diffPixels, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{testMask1})
+	_, diffPixels, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{testMask1}, 0)
 
 	if err != nil {
 		t.Fatal("Error comparing images:", err)
@@ -47,7 +47,7 @@ func TestBinDiffMask(t *testing.T) {
 		t.Fatal("Expected number of pixel differences between testImg1 and testImg2 with testMask1 to be 33351, got ", diffPixels)
 	}
 
-	_, diffPixels, err = compareImagesBin(testImg1, testImg1, []image.Rectangle{testMask1})
+	_, diffPixels, err = compareImagesBin(testImg1, testImg1, []image.Rectangle{testMask1}, 0)
 
 	if err != nil {
 		t.Fatal("Error comparing images:", err)
