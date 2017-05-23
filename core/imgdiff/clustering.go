@@ -1,4 +1,4 @@
-package core
+package imgdiff
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ type clusterer func(image.Image) []image.Rectangle
 
 var NoPixelFoundErr = errors.New("No pixel found")
 
-func naiveClusterer(img image.Image) []image.Rectangle {
+func PerformClustering(img image.Image) []image.Rectangle {
 	mask := image.NewAlpha(img.Bounds())
 
 	var err error

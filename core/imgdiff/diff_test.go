@@ -1,9 +1,28 @@
-package core
+package imgdiff
 
 import (
 	"image"
+	_ "image/png"
+	"os"
 	"testing"
 )
+
+var (
+	testImg1        = readImage("../testimages/so_1.png")
+	testImg2        = readImage("../testimages/so_2.png")
+	testMask1       = image.Rectangle{image.Point{0, 0}, image.Point{300, 300}}
+	testMaskInvalid = image.Rectangle{image.Point{10, 10}, image.Point{2, 30}}
+)
+
+func readImage(path string) image.Image {
+	reader, _ := os.Open(path)
+	defer reader.Close()
+	im, _, err := image.Decode(reader)
+	if err != nil {
+		panic(err)
+	}
+	return im
+}
 
 func TestBinDiff(t *testing.T) {
 	_, diffPixels, err := compareImagesBin(testImg1, testImg2, []image.Rectangle{}, 0)

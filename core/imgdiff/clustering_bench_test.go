@@ -1,4 +1,4 @@
-package core
+package imgdiff
 
 import (
 	"image"
@@ -12,7 +12,7 @@ func BenchmarkGerardClustering(b *testing.B) {
 		b.Fatal("Error comparing images:", err)
 	}
 
-	benchmarkclusterer(b, naiveClusterer, img)
+	benchmarkclusterer(b, PerformClustering, img)
 }
 
 func benchmarkclusterer(b *testing.B, c clusterer, img image.Image) {

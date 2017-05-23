@@ -14,7 +14,7 @@ cleandb:
 	rm -rf cockroach-data optician.db
 
 test:
-	go test -v . ./core ./core/store ./core/store/bolt ./core/store/sql
+	go test ./...
 
 createcert:
 	openssl genrsa -out server.key 2048

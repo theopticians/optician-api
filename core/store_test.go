@@ -5,6 +5,9 @@ import (
 	"os"
 	"testing"
 
+	_ "image/png"
+
+	"github.com/theopticians/optician-api/core/imgdiff"
 	stores "github.com/theopticians/optician-api/core/store"
 )
 
@@ -40,7 +43,7 @@ func GenericTestStore(t *testing.T, newStore func() stores.Store) {
 			t.Fatal("Error retrieving image:", err)
 		}
 
-		_, diffPixels, err := compareImagesBin(testImg1, img1Retrieved, []image.Rectangle{}, 0)
+		_, diffPixels := imgdiff.ComputeDiffImage(testImg1, img1Retrieved, []image.Rectangle{})
 		if err != nil {
 			t.Fatal("Error comparing images:", err)
 		}

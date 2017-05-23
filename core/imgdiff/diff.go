@@ -1,4 +1,4 @@
-package core
+package imgdiff
 
 import (
 	"image"
@@ -6,47 +6,9 @@ import (
 
 	colorful "github.com/lucasb-eyer/go-colorful"
 	"github.com/pkg/errors"
-	"github.com/theopticians/optician-api/core/structs"
 )
 
-func RunTest(r *structs.Result) error {
-
-	baseImg, err := db.GetImage(r.BaseImageID)
-	if err != nil {
-		return errors.Wrap(err, "error getting base image")
-	}
-
-	testImg, err := db.GetImage(r.ImageID)
-	if err != nil {
-		return errors.Wrap(err, "error getting test image")
-	}
-
-	var mask []image.Rectangle
-	if r.MaskID == "nomask" {
-		mask = []image.Rectangle{}
-	} else {
-		mask, err = db.GetMask(r.MaskID)
-		if err != nil {
-			return errors.Wrap(err, "error getting mask")
-		}
-	}
-
-	diffImg, diffScore := computeDiffImage(baseImg, testImg, mask)
-
-	diffImageID, err := db.StoreImage(diffImg)
-
-	if err != nil {
-		return errors.Wrap(err, "error getting storing diff image")
-	}
-
-	r.DiffClusters = naiveClusterer(diffImg)
-	r.DiffImageID = diffImageID
-	r.DiffScore = diffScore
-
-	return nil
-}
-
-func computeDiffImage(img1, img2 image.Image, masks []image.Rectangle) (image.Image, float64) {
+func ComputeDiffImage(img1, img2 image.Image, masks []image.Rectangle) (image.Image, float64) {
 	diffImg, n, _ := compareImagesBin(img1, img2, masks, 0.05)
 	return diffImg, float64(n)
 }
